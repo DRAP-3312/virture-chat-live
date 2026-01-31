@@ -28,7 +28,7 @@ const props = withDefaults(
     theme?: Partial<ChatTheme>;
   }>(),
   {
-    socketUrl: "http://localhost",
+    socketUrl: "http://localhost:7777",
     idAgent: "65d7a475abc4c71e14dee693",
     apiKey:
       "api",
@@ -177,7 +177,7 @@ onMounted(() => {
             backgroundColor: resolveTheme('welcomeTextColor'),
             animationDelay: `${(i - 1) * 0.2}s`,
           }"
-        />
+        ></span>
       </div>
     </transition>
 
