@@ -1,0 +1,352 @@
+<script setup lang="ts">
+import { ref, onMounted, watch } from "vue";
+import { SendHorizontal } from "lucide-vue-next";
+import ChatMessages from "./ChatMessages.vue";
+import TypingIndicator from "./TypingIndicator.vue";
+import { useChatStore } from "../composables/useChatStore";
+import { useSessionMetrics } from "../composables/useSessionMetrics";
+import { useSound } from "../composables/useSound";
+import { sendFlexibleEvent, CHAT_EVENTS } from "../utils/analytics";
+import { Filter } from "bad-words";
+import { badWordsSpanishList } from "../utils/bad-words-es";
+
+interface SocketLike {
+  emit: (event: string, ...args: unknown[]) => unknown;
+  on: (event: string, callback: (...args: unknown[]) => void) => unknown;
+}
+
+const props = defineProps<{
+  socket: SocketLike;
+  sendMetricsNow: () => void;
+  chatPanelBackground: string;
+  chatHeaderBackground: string;
+  chatHeaderTextColor: string;
+  chatInputBackground: string;
+  chatInputTextColor: string;
+  chatInputBorderColor: string;
+  sendButtonBackground: string;
+  userMessageBackground: string;
+  userMessageTextColor: string;
+  botMessageBackground: string;
+  botMessageTextColor: string;
+  instanceName?: string;
+  iconButtonUrl?: string;
+}>();
+
+const emit = defineEmits<{
+  close: [];
+}>();
+
+const textareaRef = ref<HTMLTextAreaElement | null>(null);
+const isVisible = ref(false);
+const typingUser = ref(false);
+const showLocationFeedback = ref(false);
+const showSoundFeedback = ref(false);
+
+const {
+  messages,
+  addMessage,
+  closeModalOption,
+  typingState,
+  setCloseModalOption,
+  stateBtnAlerts,
+  stateBtnUbication,
+  setStateBtnAlert,
+  setStateBtnUbication,
+} = useChatStore();
+
+const { requestLocationPermission } = useSessionMetrics();
+const { enableSound } = useSound();
+
+const message = ref("");
+const filter = new Filter();
+let typingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function eventTextArea(event: Event) {
+  const input = (event.target as HTMLTextAreaElement).value;
+  typingUser.value = input.trim() !== "";
+  if (typingTimeout) clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    typingUser.value = false;
+  }, 1000);
+}
+
+watch(typingUser, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    props.socket.emit("typing-user-state", newVal);
+  }
+});
+
+watch(isVisible, (val) => {
+  if (val && textareaRef.value) {
+    setTimeout(() => textareaRef.value?.focus(), 100);
+  }
+});
+
+function sendMessage() {
+  const valueToSend = filter.clean(message.value.trim());
+  if (!valueToSend || !props.socket) return;
+
+  const hasClientMessages = messages.value.some(
+    (msg) => msg.role === "user" && !msg.deleteMarker,
+  );
+
+  addMessage({ content: valueToSend, role: "user" });
+  props.socket.emit(
+    "send-chat-message",
+    { message: valueToSend, messageType: "text" },
+    () => {},
+  );
+
+  const id = localStorage.getItem("userUUID");
+  sendFlexibleEvent(CHAT_EVENTS.MESSAGE_SENT_CLIENT, {
+    chat_session_id: id,
+    chat_message_length: valueToSend.length,
+    chat_message_type: "text",
+  });
+
+  if (!hasClientMessages) {
+    sendFlexibleEvent(CHAT_EVENTS.SESSION_STARTED, { chat_session_id: id });
+  }
+
+  message.value = "";
+}
+
+function handleEnterKey() {
+  if (window.innerWidth >= 1024) sendMessage();
+}
+
+function handleClose() {
+  sendFlexibleEvent(CHAT_EVENTS.WIDGET_CLOSED, { chat_form_close: true });
+  isVisible.value = false;
+  emit("close");
+}
+
+async function handleLocationPermission() {
+  try {
+    await requestLocationPermission();
+    setStateBtnUbication(true);
+    props.sendMetricsNow();
+    showLocationFeedback.value = true;
+    setTimeout(() => {
+      showLocationFeedback.value = false;
+    }, 3000);
+  } catch (error) {
+    console.error("Error al solicitar permiso de ubicacion:", error);
+  }
+}
+
+function handleAudioPermission() {
+  enableSound();
+  setStateBtnAlert(true);
+  showSoundFeedback.value = true;
+  setTimeout(() => {
+    showSoundFeedback.value = false;
+  }, 3000);
+}
+
+onMounted(() => {
+  filter.addWords(...badWordsSpanishList);
+  textareaRef.value?.focus();
+  setTimeout(() => {
+    isVisible.value = true;
+  }, 100);
+});
+</script>
+
+<template>
+  <transition name="slide-fade">
+    <div
+      v-if="isVisible"
+      class="fixed inset-0 w-dvw h-dvh rounded-none m-0 flex flex-col overflow-hidden text-xs font-sans lg:relative lg:bottom-20 lg:left-0 lg:h-[70dvh] lg:w-[35vw] xl:w-[23vw] xl:h-[68dvh] lg:rounded-md lg:shadow-xl lg:m-0"
+      :style="{ backgroundColor: chatPanelBackground }"
+    >
+      <!-- Header -->
+      <div
+        class="flex p-2 w-full h-[10%] justify-between items-center relative"
+        :style="{
+          color: chatHeaderTextColor,
+          backgroundColor: chatHeaderBackground,
+        }"
+      >
+        <div
+          v-if="iconButtonUrl"
+          class="w-12 h-12 rounded-full overflow-hidden"
+        >
+          <img
+            :src="iconButtonUrl"
+            alt="img"
+            class="w-full h-full object-cover rounded-full"
+          />
+        </div>
+        <div class="flex p-2 grow gap-1 items-center">
+          <div
+            class="flex flex-col justify-center items-start gap-1"
+            :style="{ color: chatHeaderTextColor }"
+          >
+            <div class="flex justify-center items-center gap-1 text-sm">
+              <strong>Bienvenido a</strong>
+              <strong v-if="instanceName">{{ instanceName }}</strong>
+            </div>
+            <span class="text-xs">Estamos aqui para ayudarte.</span>
+          </div>
+        </div>
+        <button
+          class="absolute top-2 right-2 bg-transparent border-none text-[22px] font-bold cursor-pointer p-1 rounded-full w-10 h-10 flex items-center justify-center transition-colors duration-200 hover:bg-white/20"
+          :style="{ color: chatHeaderTextColor }"
+          @click="handleClose"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="w-full h-0.5 bg-gray-200" />
+
+      <!-- Permission buttons -->
+      <div v-if="!closeModalOption" class="w-full flex flex-col p-2">
+        <div
+          class="border border-gray-200 rounded-md hover:bg-gray-50 flex gap-1 justify-between items-start shadow-lg"
+        >
+          <div class="flex gap-1 p-2 w-full">
+            <button
+              v-if="!stateBtnUbication"
+              class="flex gap-1 justify-center items-center border border-blue-500 text-gray-600 hover:text-white px-3 py-1 rounded-md hover:bg-blue-600 grow"
+              @click="handleLocationPermission"
+            >
+              <p class="text-lg">📍</p>
+              <p>Compartir ubicacion</p>
+            </button>
+            <button
+              v-if="!stateBtnAlerts"
+              class="flex gap-1 justify-center items-center border border-purple-500 text-gray-600 hover:text-white px-3 py-1 rounded-md hover:bg-purple-600 grow"
+              @click="handleAudioPermission"
+            >
+              <p class="text-lg">🔊</p>
+              <p>Recibir alertas</p>
+            </button>
+          </div>
+          <div class="flex justify-end items-center">
+            <button
+              class="hover:bg-gray-200 text-lg rounded-md w-8 h-8 justify-center items-center"
+              @click="setCloseModalOption"
+            >
+              x
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages area -->
+      <div
+        class="flex flex-col grow overflow-y-auto bg-transparent p-2 relative"
+      >
+        <transition name="feedback-fade">
+          <div
+            v-if="showLocationFeedback"
+            class="absolute top-2 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg flex items-center gap-2 whitespace-nowrap"
+          >
+            <span class="text-lg">✓</span>
+            <span class="font-medium">Gracias por compartir tu ubicacion!</span>
+          </div>
+        </transition>
+
+        <transition name="feedback-fade">
+          <div
+            v-if="showSoundFeedback"
+            class="absolute top-2 left-1/2 -translate-x-1/2 z-50 bg-purple-500 text-white px-4 py-2 rounded-md shadow-lg flex items-center gap-2 whitespace-nowrap"
+          >
+            <span class="text-lg">✓</span>
+            <span class="font-medium">Notificaciones activadas</span>
+          </div>
+        </transition>
+
+        <ChatMessages
+          :user-message-background="userMessageBackground"
+          :user-message-text-color="userMessageTextColor"
+          :bot-message-background="botMessageBackground"
+          :bot-message-text-color="botMessageTextColor"
+        />
+      </div>
+
+      <!-- Input area -->
+      <div
+        class="flex flex-col h-[10%]"
+        :style="{ backgroundColor: chatInputBackground }"
+      >
+        <transition name="fade-slide" mode="out-in">
+          <div
+            v-if="typingState === 'in-progress'"
+            key="typing"
+            class="flex items-center h-full w-full p-2"
+          >
+            <TypingIndicator :instance-name="instanceName" />
+          </div>
+          <div v-else key="input" class="flex gap-2 items-center p-2 h-full">
+            <textarea
+              ref="textareaRef"
+              v-model="message"
+              placeholder="Enviar mensaje..."
+              class="grow p-2 outline-none resize-none text-gray-700 text-base lg:text-xs rounded-md transition duration-150 bg-transparent border border-gray-200 focus:border-gray-200 focus:ring-1 focus:ring-gray-200"
+              :style="{
+                backgroundColor: chatInputBackground,
+                color: chatInputTextColor,
+                borderColor: chatInputBorderColor,
+              }"
+              @keyup.enter="handleEnterKey"
+              @input="eventTextArea"
+            />
+            <button
+              class="w-12.5 h-12.5 lg:hidden rounded-md text-white flex items-center justify-center transition-transform duration-200 hover:scale-105"
+              :style="{ backgroundColor: sendButtonBackground }"
+              @click="sendMessage"
+            >
+              <SendHorizontal :size="20" />
+            </button>
+          </div>
+        </transition>
+      </div>
+    </div>
+  </transition>
+</template>
+
+<style scoped>
+.slide-fade-enter-active {
+  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.slide-fade-leave-active {
+  transition: all 0.3s ease-in;
+}
+.slide-fade-enter-from {
+  transform: scale(0);
+  opacity: 0;
+}
+.slide-fade-leave-to {
+  transform: scale(0.8);
+  opacity: 0;
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease-out;
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.feedback-fade-enter-active {
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out;
+}
+.feedback-fade-leave-active {
+  transition:
+    opacity 0.3s ease-in,
+    transform 0.3s ease-in;
+}
+.feedback-fade-enter-from,
+.feedback-fade-leave-to {
+  opacity: 0;
+}
+</style>
