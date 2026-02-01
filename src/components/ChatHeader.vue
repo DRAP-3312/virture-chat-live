@@ -5,6 +5,7 @@ defineProps<{
   backgroundColor: string;
   textColor: string;
   accentColor: string;
+  socketState: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -47,9 +48,9 @@ const emit = defineEmits<{
       <div
         class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full ring-2 ring-white"
         :style="{
-          backgroundColor: '#10b981',
+          backgroundColor: socketState ? '#10b981' : '#fabe28',
         }"
-      />
+      ></div>
     </div>
 
     <!-- Info with better spacing -->
@@ -61,14 +62,14 @@ const emit = defineEmits<{
         <span
           class="text-[10px] px-2 py-0.5 rounded-full font-medium"
           :style="{
-            backgroundColor: '#10b98120',
-            color: '#10b981',
+            backgroundColor: socketState ? '#10b98120' : '#fef9c3',
+            color: socketState ? '#10b981' : '#854d0e',
           }"
         >
-          En línea
+          {{ socketState ? "En línea" : "Servicio no disponible" }}
         </span>
       </div>
-      <span class="text-[11px] opacity-70">Respondemos en minutos</span>
+      <span class="text-[11px] opacity-70">Estamos para ayudarte</span>
     </div>
 
     <!-- Close button improved -->

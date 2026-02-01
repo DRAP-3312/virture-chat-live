@@ -36,6 +36,7 @@ const props = defineProps<{
   botMessageTextColor: string;
   instanceName?: string;
   iconButtonUrl?: string;
+  socketState: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -157,6 +158,7 @@ onMounted(() => {
     >
       <!-- Header -->
       <ChatHeader
+        :socket-state="socketState"
         :instance-name="instanceName"
         :icon-button-url="iconButtonUrl"
         :background-color="backgroundColor"

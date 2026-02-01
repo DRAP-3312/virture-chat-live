@@ -77,6 +77,7 @@ export function useSocket(
   const widgetInterval = ref<ReturnType<typeof setInterval> | null>(null);
   const metricsInterval = ref<ReturnType<typeof setInterval> | null>(null);
   const lastPath = ref("");
+  const socketState = ref(false);
 
   const {
     setMessages,
@@ -142,6 +143,7 @@ export function useSocket(
     socket.value = manager.value.socket(nameSpace);
 
     socket.value.on(SocketEvent.CONNECT, () => {
+      socketState.value = true;
       emitConnectedChat(
         socket.value,
         { userUUID, agentId: idAgent },
@@ -153,7 +155,9 @@ export function useSocket(
       );
     });
 
-    socket.value.on(SocketEvent.DISCONNECT, () => {});
+    socket.value.on(SocketEvent.DISCONNECT, () => {
+      socketState.value = false;
+    });
 
     socket.value.on(SocketEvent.RESPONSE, (val: unknown) => {
       const msg = val as import("../types/chat").ChatMessage;
@@ -203,16 +207,20 @@ export function useSocket(
 
   function setupWidgetConfig() {
     widgetInterval.value = setInterval(() => {
-      emitGetCustomWidget(socket.value, idAgent, (val: Record<string, unknown>) => {
-        if (
-          !shallowEqual(
-            val as unknown as Record<string, unknown>,
-            customStyle.value as unknown as Record<string, unknown>,
-          )
-        ) {
-          setCustomStyle({ ...val as CustomStyle });
-        }
-      });
+      emitGetCustomWidget(
+        socket.value,
+        idAgent,
+        (val: Record<string, unknown>) => {
+          if (
+            !shallowEqual(
+              val as unknown as Record<string, unknown>,
+              customStyle.value as unknown as Record<string, unknown>,
+            )
+          ) {
+            setCustomStyle({ ...(val as CustomStyle) });
+          }
+        },
+      );
     }, 1000);
   }
 
@@ -258,5 +266,6 @@ export function useSocket(
     socket,
     manager,
     sendMetricsNow,
+    socketState,
   };
 }

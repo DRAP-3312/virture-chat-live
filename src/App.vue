@@ -46,7 +46,11 @@ const showGreetingModal = ref(false);
 const showTypingIndicator = ref(false);
 
 const { openChat, setOpenChat, customStyle } = useChatStore();
-const { socket: chatSocket, sendMetricsNow } = useSocket(
+const {
+  socket: chatSocket,
+  sendMetricsNow,
+  socketState,
+} = useSocket(
   props.socketUrl,
   props.idAgent,
   props.apiKey,
@@ -246,6 +250,7 @@ onMounted(() => {
         :bot-message-text-color="resolveTheme('botMessageTextColor')"
         :instance-name="instanceName"
         :icon-button-url="customStyle.icon_button_url"
+        :socket-state="socketState"
         @close="toggleChat"
       />
     </div>
