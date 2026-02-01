@@ -59,8 +59,9 @@ src/
 ### Paso 1: Configuracion del proyecto
 - [x] Proyecto Vue 3 + TypeScript + Vite creado
 - [ ] Instalar dependencias: tailwindcss, socket.io-client, uuid, dompurify, bad-words, lucide-vue-next
-- [ ] Configurar Tailwind CSS v4
-- [ ] Copiar archivos de sonido
+- [ ] Configurar Tailwind CSS v4 (proyecto original usa v3.4.17)
+- [ ] Copiar archivos de sonido (sound1-5.mp3 de assets/sound/)
+- [ ] Migrar de archivos .cjs a ESM (.js) para configs
 
 ### Paso 2: Tipos e interfaces
 - [ ] Crear types/chat.ts (Message, Attachment, ChatTheme, WidgetConfig, CustomStyle)
@@ -73,11 +74,12 @@ src/
 - [ ] Crear sanitize.ts (wrapper DOMPurify)
 
 ### Paso 4: Composables
-- [ ] Migrar useChatStore.ts (useMessages.js -> TypeScript + tipado)
-- [ ] Migrar useSocket.ts (socket-connection.js -> TypeScript + tipado)
-- [ ] Migrar useSessionMetrics.ts
-- [ ] Migrar useSound.ts (fusionar useSound + soundInstance)
-- [ ] Migrar useUtm.ts
+- [ ] Migrar useChatStore.ts (useChatMessages de useMessages.js -> TypeScript + tipado)
+- [ ] Migrar useSocket.ts (useSocketConnection de socket-connection.js -> TypeScript + tipado)
+- [ ] Migrar useSessionMetrics.ts (mantener mismo nombre)
+- [ ] Migrar useSound.ts (fusionar useSound.js + soundInstance.js que exporta playSound)
+- [ ] Migrar useUtm.ts (get_utm.js -> TypeScript)
+- [ ] Eliminar compare-objects.js (reemplazar areObjectsDeepEqual con alternativa nativa o libreria)
 
 ### Paso 5: Componentes
 - [ ] WelcomeModal.vue (extraer del App.vue original)
@@ -106,3 +108,22 @@ src/
 | TypingLoader.vue | TypingIndicator.vue | Solo Tailwind |
 | ChatWidget.js | widget-entry.ts | TypeScript |
 | (parte de App.vue) | WelcomeModal.vue | Extraido como componente |
+| widget/Widget.vue | ELIMINADO | Componente experimental, no usado en produccion |
+
+## Notas Importantes sobre el Proyecto Original
+
+### Exports Correctos de Composables
+- **socket-connection.js** exporta `useSocketConnection` (no `socketConnection`)
+- **useMessages.js** exporta `useChatMessages` (no `useMessages`)
+- **soundInstance.js** exporta un singleton con `playSound`
+- **compare-objects.js** exporta `areObjectsDeepEqual`
+
+### Versiones Actuales
+- Vite: ^6.2.0 (proyecto nuevo usará última versión estable)
+- Tailwind: ^3.4.17 (proyecto nuevo migrará a v4)
+- Vue: ^3.5.13 (mantener versión compatible)
+
+### Archivos Adicionales no Documentados Inicialmente
+- `src/components/widget/Widget.vue` - Componente experimental (ignorar)
+- `src/assets/vue.svg` - Logo de Vue (copiar si es necesario)
+- `tailwind.config.cjs` y `postcss.config.cjs` - Configs en CommonJS (migrar a ESM)

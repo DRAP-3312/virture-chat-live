@@ -1,12 +1,20 @@
 import type { ChatMessage } from './chat'
 
 export interface ClientToServerEvents {
-  'connected-chat': (utms: Record<string, string> | null, callback: (messages: ChatMessage[]) => void) => void
-  'send-chat-message': (data: { message: string; messageType: string }, callback: (val: unknown) => void) => void
+  'connected-chat': (data: { userUUID: string; agentId: string }, callback: (val: { messages?: ChatMessage[] }) => void) => void
+  'send-chat-message': (data: SendMessageData, callback: (val: unknown) => void) => void
   'typing-user-state': (isTyping: boolean) => void
   'navigation-path-chat': (data: NavigationData) => void
-  'get-custom-widget': (callback: (config: Record<string, unknown>) => void) => void
+  'get-custom-widget': (agentId: string, callback: (config: Record<string, unknown>) => void) => void
   'metrics-chat': (metrics: SessionMetricsPayload) => void
+}
+
+export interface SendMessageData {
+  userUUID: string
+  message: string
+  agentId: string
+  api_key: string
+  utms: Record<string, string> | null
 }
 
 export interface ServerToClientEvents {

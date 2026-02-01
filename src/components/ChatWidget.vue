@@ -6,6 +6,7 @@ import TypingIndicator from "./TypingIndicator.vue";
 import { useChatStore } from "../composables/useChatStore";
 import { useSessionMetrics } from "../composables/useSessionMetrics";
 import { useSound } from "../composables/useSound";
+import { getStoredUtms } from "../composables/useUtm";
 import { sendFlexibleEvent, CHAT_EVENTS } from "../utils/analytics";
 import { Filter } from "bad-words";
 import { badWordsSpanishList } from "../utils/bad-words-es";
@@ -18,6 +19,8 @@ interface SocketLike {
 const props = defineProps<{
   socket: SocketLike;
   sendMetricsNow: () => void;
+  idAgent: string;
+  apiKey: string;
   chatPanelBackground: string;
   chatHeaderBackground: string;
   chatHeaderTextColor: string;
@@ -91,22 +94,30 @@ function sendMessage() {
     (msg) => msg.role === "user" && !msg.deleteMarker,
   );
 
+  const userUUID = localStorage.getItem("userUUID") ?? "";
+  const utms = getStoredUtms();
+
   addMessage({ content: valueToSend, role: "user" });
   props.socket.emit(
     "send-chat-message",
-    { message: valueToSend, messageType: "text" },
+    {
+      userUUID,
+      message: valueToSend,
+      agentId: props.idAgent,
+      api_key: props.apiKey,
+      utms,
+    },
     () => {},
   );
 
-  const id = localStorage.getItem("userUUID");
   sendFlexibleEvent(CHAT_EVENTS.MESSAGE_SENT_CLIENT, {
-    chat_session_id: id,
+    chat_session_id: userUUID,
     chat_message_length: valueToSend.length,
     chat_message_type: "text",
   });
 
   if (!hasClientMessages) {
-    sendFlexibleEvent(CHAT_EVENTS.SESSION_STARTED, { chat_session_id: id });
+    sendFlexibleEvent(CHAT_EVENTS.SESSION_STARTED, { chat_session_id: userUUID });
   }
 
   message.value = "";
