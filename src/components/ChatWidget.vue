@@ -10,6 +10,7 @@ import { getStoredUtms } from "../composables/useUtm";
 import { sendFlexibleEvent, CHAT_EVENTS } from "../utils/analytics";
 import { Filter } from "bad-words";
 import { badWordsSpanishList } from "../utils/bad-words-es";
+import { emitTypingUserState, emitSendChatMessage } from "../services/socketService";
 
 interface SocketLike {
   emit: (event: string, ...args: unknown[]) => unknown;
@@ -76,7 +77,7 @@ function eventTextArea(event: Event) {
 
 watch(typingUser, (newVal, oldVal) => {
   if (newVal !== oldVal) {
-    props.socket.emit("typing-user-state", newVal);
+    emitTypingUserState(props.socket, newVal);
   }
 });
 
@@ -98,8 +99,8 @@ function sendMessage() {
   const utms = getStoredUtms();
 
   addMessage({ content: valueToSend, role: "user" });
-  props.socket.emit(
-    "send-chat-message",
+  emitSendChatMessage(
+    props.socket,
     {
       userUUID,
       message: valueToSend,

@@ -7,6 +7,13 @@ import { sendFlexibleEvent, CHAT_EVENTS } from "../utils/analytics";
 import { useSessionMetrics } from "./useSessionMetrics";
 import { useSound } from "./useSound";
 import type { CustomStyle } from "../types/chat";
+import { SocketEvent } from "../types/socket-events";
+import {
+  emitConnectedChat,
+  emitNavigationPath,
+  emitGetCustomWidget,
+  emitMetricsChat,
+} from "../services/socketService";
 
 function deepEqual(obj1: unknown, obj2: unknown): boolean {
   if (obj1 === obj2) return true;
@@ -134,9 +141,9 @@ export function useSocket(
 
     socket.value = manager.value.socket(nameSpace);
 
-    socket.value.on("connect", () => {
-      socket.value!.emit(
-        "connected-chat",
+    socket.value.on(SocketEvent.CONNECT, () => {
+      emitConnectedChat(
+        socket.value,
         { userUUID, agentId: idAgent },
         (val: { messages?: import("../types/chat").ChatMessage[] }) => {
           if (val.messages) {
@@ -146,31 +153,31 @@ export function useSocket(
       );
     });
 
-    socket.value.on("disconnect", () => {});
+    socket.value.on(SocketEvent.DISCONNECT, () => {});
 
-    socket.value.on("response", (val: unknown) => {
+    socket.value.on(SocketEvent.RESPONSE, (val: unknown) => {
       const msg = val as import("../types/chat").ChatMessage;
       addMessage(msg);
       playSound(customStyle.value.soundName ?? soundName ?? "sound1");
     });
 
-    socket.value.on("lead-registered", () => {
+    socket.value.on(SocketEvent.LEAD_REGISTERED, () => {
       sendFlexibleEvent(CHAT_EVENTS.LEAD_REGISTERED, {
         chat_session_id: userUUID,
       });
     });
 
-    socket.value.on("scheduled_appointment", () => {
+    socket.value.on(SocketEvent.SCHEDULED_APPOINTMENT, () => {
       sendFlexibleEvent(CHAT_EVENTS.SCHEDULED_APPOINTMENT, {
         chat_session_id: userUUID,
       });
     });
 
-    socket.value.on("typing-state-widget", (stateWidget: string) => {
+    socket.value.on(SocketEvent.TYPING_STATE_WIDGET, (stateWidget: string) => {
       setTypingStateWidget(stateWidget);
     });
 
-    socket.value.on("delete-message", (messageIds: string[]) => {
+    socket.value.on(SocketEvent.DELETE_MESSAGE, (messageIds: string[]) => {
       deleteMessages(messageIds);
     });
   }
@@ -182,7 +189,7 @@ export function useSocket(
 
       if (currentPath !== lastPath.value) {
         const now = new Date();
-        socket.value?.emit("navigation-path-chat", {
+        emitNavigationPath(socket.value, {
           urlPath: currentPath,
           time: now.toISOString(),
           clientId: getUserUUID(),
@@ -196,14 +203,14 @@ export function useSocket(
 
   function setupWidgetConfig() {
     widgetInterval.value = setInterval(() => {
-      socket.value?.emit("get-custom-widget", idAgent, (val: CustomStyle) => {
+      emitGetCustomWidget(socket.value, idAgent, (val: Record<string, unknown>) => {
         if (
           !shallowEqual(
             val as unknown as Record<string, unknown>,
             customStyle.value as unknown as Record<string, unknown>,
           )
         ) {
-          setCustomStyle({ ...val });
+          setCustomStyle({ ...val as CustomStyle });
         }
       });
     }, 1000);
@@ -213,7 +220,7 @@ export function useSocket(
     metricsInterval.value = setInterval(() => {
       const currentMetrics = prepareMetrics();
       if (!deepEqual(lastMetrics, currentMetrics)) {
-        socket.value?.emit("metrics-chat", currentMetrics);
+        emitMetricsChat(socket.value, currentMetrics);
         lastMetrics = currentMetrics;
       }
     }, 10000);
@@ -221,7 +228,7 @@ export function useSocket(
 
   function sendMetricsNow() {
     const currentMetrics = prepareMetrics();
-    socket.value?.emit("metrics-chat", currentMetrics);
+    emitMetricsChat(socket.value, currentMetrics);
     lastMetrics = currentMetrics;
   }
 
