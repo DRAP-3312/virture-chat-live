@@ -10,6 +10,8 @@ const props = defineProps<{
   userMessageTextColor: string;
   botMessageBackground: string;
   botMessageTextColor: string;
+  iconButtonUrl?: string;
+  instanceName?: string;
 }>();
 
 const isUser = computed(() => props.message.role === "user");
@@ -29,49 +31,79 @@ function formatTime(timestamp?: string): string {
 <template>
   <div
     :class="[
-      'flex flex-col my-2 max-w-[70%] gap-2 sm:max-w-[85%]',
-      isUser ? 'ml-auto items-end' : 'mr-auto items-start',
+      'flex my-1.5 max-w-[75%] gap-2 sm:max-w-[85%]',
+      isUser ? 'ml-auto flex-row-reverse' : 'mr-auto',
     ]"
   >
-    <!-- Attachments -->
-    <div
-      v-if="message.attachments?.length"
-      :class="[
-        'flex flex-col gap-2 w-full max-w-75',
-        message.attachments.some((a) => a.mimeType?.startsWith('image/'))
-          ? 'grid grid-cols-3 gap-2'
-          : '',
-      ]"
-    >
-      <MessageAttachment
-        v-for="(attachment, i) in message.attachments"
-        :key="i"
-        :attachment="attachment"
-        :is-multiple="message.attachments!.length > 1"
-      />
+    <!-- Avatar (only for bot messages) -->
+    <div v-if="!isUser" class="flex-shrink-0">
+      <div
+        v-if="iconButtonUrl"
+        class="w-7 h-7 rounded-full overflow-hidden ring-1 ring-black/5"
+      >
+        <img
+          :src="iconButtonUrl"
+          alt="Bot avatar"
+          class="w-full h-full object-cover"
+        />
+      </div>
+      <div
+        v-else
+        class="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-white text-xs font-bold"
+        :style="{ backgroundColor: botMessageBackground }"
+      >
+        {{ instanceName ? instanceName.charAt(0).toUpperCase() : "B" }}
+      </div>
     </div>
 
-    <!-- Text content -->
+    <!-- Message content wrapper -->
     <div
-      v-if="message.content"
-      class="message-bubble rounded-xl min-w-10 wrap-break-word px-4 py-3 font-sans text-base transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-      :style="{
-        backgroundColor: isUser ? userMessageBackground : botMessageBackground,
-        color: isUser ? userMessageTextColor : botMessageTextColor,
-      }"
-      v-html="formattedContent"
-    />
-
-    <!-- Timestamp -->
-    <div
-      v-if="message.createdAt"
-      :class="[
-        'text-[10px] mt-0.5 opacity-60',
-        isUser ? 'text-right' : 'text-left',
-      ]"
-      :style="{ color: textColor }"
+      :class="['flex flex-col gap-1.5', isUser ? 'items-end' : 'items-start']"
     >
-      {{ formatTime(message.createdAt) }}
+      <!-- Attachments -->
+      <div
+        v-if="message.attachments?.length"
+        :class="[
+          'flex flex-col gap-2 w-full max-w-75',
+          message.attachments.some((a) => a.mimeType?.startsWith('image/'))
+            ? 'grid grid-cols-3 gap-2'
+            : '',
+        ]"
+      >
+        <MessageAttachment
+          v-for="(attachment, i) in message.attachments"
+          :key="i"
+          :attachment="attachment"
+          :is-multiple="message.attachments!.length > 1"
+        />
+      </div>
+
+      <!-- Text content -->
+      <div
+        v-if="message.content"
+        class="message-bubble min-w-10 wrap-break-word px-4 py-2.5 font-sans text-sm transition-all duration-200 shadow-sm"
+        :style="{
+          backgroundColor: isUser
+            ? userMessageBackground
+            : botMessageBackground,
+          color: isUser ? userMessageTextColor : botMessageTextColor,
+          borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+        }"
+        v-html="formattedContent"
+      />
+
+      <!-- Timestamp -->
+      <div
+        v-if="message.createdAt"
+        :class="[
+          'text-[10px] px-1 opacity-50',
+          isUser ? 'text-right' : 'text-left',
+        ]"
+        :style="{ color: textColor }"
+      >
+        {{ formatTime(message.createdAt) }}
+      </div>
     </div>
   </div>
 </template>

@@ -30,8 +30,7 @@ const props = withDefaults(
   {
     socketUrl: "http://localhost:7777",
     idAgent: "65d7a475abc4c71e14dee693",
-    apiKey:
-      "api",
+    apiKey: "api",
     nameSpace: "/chat",
     gaTrackingId: "",
     welcomeMessage: "Hola que tal",
@@ -159,23 +158,25 @@ onMounted(() => {
 
 <template>
   <div class="chat-container text-sm" :class="{ 'chat-open': openChat }">
-    <!-- Typing indicator dots -->
-    <transition name="typing-fade">
+    <!-- Typing indicator dots with enhanced animation -->
+    <transition name="typing-bounce">
       <div
         v-if="showTypingIndicator"
-        class="absolute bottom-20 left-[80%] flex items-center px-3 py-2 rounded-[15px_15px_15px_5px] shadow-md z-1000"
+        class="absolute bottom-20 left-[80%] flex items-center px-4 py-2.5 rounded-[16px_16px_16px_4px] shadow-lg z-1000 backdrop-blur-sm"
         :style="{
           backgroundColor: resolveTheme('backgroundColor'),
           color: resolveTheme('textColor'),
+          border: `1px solid ${resolveTheme('textColor')}15`,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
         }"
       >
         <span
           v-for="i in 3"
           :key="i"
-          class="h-2 w-2 mx-0.5 rounded-full opacity-40 animate-[typing-dots_1.2s_ease-in-out_infinite]"
+          class="h-2.5 w-2.5 mx-0.5 rounded-full typing-dot"
           :style="{
-            backgroundColor: resolveTheme('textColor'),
-            animationDelay: `${(i - 1) * 0.2}s`,
+            backgroundColor: resolveTheme('accentColor'),
+            animationDelay: `${(i - 1) * 0.15}s`,
           }"
         ></span>
       </div>
@@ -200,22 +201,33 @@ onMounted(() => {
       @dismiss="dismissGreeting"
     />
 
-    <!-- Chat button -->
-    <button
-      ref="chatButtonRef"
-      v-if="!openChat"
-      class="w-15 h-15 rounded-full overflow-hidden relative p-0 border-none shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 z-1002 hover:scale-105 flex items-center justify-center cursor-pointer"
-      :style="{ backgroundColor: resolveTheme('accentColor') }"
-      @click="toggleChat"
-    >
-      <img
-        v-if="props.iconButton || customStyle.icon_button_url"
-        :src="customStyle.icon_button_url || props.iconButton"
-        alt="Chat logo"
-        class="block w-full h-full object-cover"
-      />
-      <MessageCircle v-else class="w-7 h-7 text-white" />
-    </button>
+    <!-- Chat button with enhanced animations -->
+    <transition name="chat-button-appear">
+      <button
+        ref="chatButtonRef"
+        v-if="!openChat"
+        class="w-15 h-15 rounded-full overflow-hidden relative p-0 border-none shadow-lg transition-all duration-300 z-1002 hover:scale-110 hover:shadow-xl active:scale-95 flex items-center justify-center cursor-pointer chat-button"
+        :style="{
+          backgroundColor: resolveTheme('accentColor'),
+          boxShadow: `0 8px 16px ${resolveTheme('accentColor')}40, 0 4px 8px rgba(0,0,0,0.1)`,
+        }"
+        @click="toggleChat"
+      >
+        <!-- Ripple effect on hover -->
+        <div class="absolute inset-0 rounded-full chat-button-ripple" />
+
+        <img
+          v-if="props.iconButton || customStyle.icon_button_url"
+          :src="customStyle.icon_button_url || props.iconButton"
+          alt="Chat logo"
+          class="block w-full h-full object-cover relative z-10"
+        />
+        <MessageCircle
+          v-else
+          class="w-7 h-7 text-white relative z-10 transition-transform duration-300"
+        />
+      </button>
+    </transition>
 
     <!-- Chat panel -->
     <div v-if="openChat" class="relative">
@@ -287,43 +299,118 @@ onMounted(() => {
   }
 }
 
-@keyframes typing-dots {
+/* Enhanced typing dots animation */
+.typing-dot {
+  animation: typing-bounce 1s ease-in-out infinite;
+}
+
+@keyframes typing-bounce {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-6px) scale(1.2);
+  }
+}
+
+/* Improved typing indicator entrance */
+.typing-bounce-enter-active {
+  animation: typing-pop-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.typing-bounce-leave-active {
+  animation: typing-pop-out 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+@keyframes typing-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes typing-pop-out {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) translateY(5px);
+  }
+}
+
+/* Enhanced greeting wave animation */
+@keyframes greet-wave {
   0%,
   100% {
-    opacity: 0.4;
-    transform: translateY(0);
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(-5deg);
   }
   50% {
-    opacity: 1;
-    transform: translateY(-4px);
+    transform: translateY(-12px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(5deg);
   }
 }
 
-.typing-fade-enter-active,
-.typing-fade-leave-active {
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
+/* Chat button subtle fade animation */
+.chat-button-appear-enter-active {
+  transition: opacity 0.3s ease-out;
 }
-.typing-fade-enter-from,
-.typing-fade-leave-to {
+
+.chat-button-appear-leave-active {
+  transition: opacity 0.2s ease-in;
+}
+
+.chat-button-appear-enter-from {
   opacity: 0;
-  transform: translateY(5px);
 }
 
-@keyframes greet-wave {
+.chat-button-appear-leave-to {
+  opacity: 0;
+}
+
+/* Ripple effect on hover */
+.chat-button:hover .chat-button-ripple {
+  animation: ripple-effect 1.5s ease-out infinite;
+}
+
+@keyframes ripple-effect {
   0% {
-    transform: translateY(0);
+    box-shadow: 0 0 0 0 currentColor;
+    opacity: 0.6;
   }
   50% {
-    transform: translateY(-8px);
+    box-shadow: 0 0 0 15px currentColor;
+    opacity: 0.3;
   }
   100% {
-    transform: translateY(0);
+    box-shadow: 0 0 0 30px currentColor;
+    opacity: 0;
   }
 }
 
+/* Breathing animation removed to prevent visual conflicts */
+
+/* Icon rotation on hover */
+.chat-button:hover .w-7 {
+  transform: rotate(15deg);
+}
+
+/* Ensure greet animation takes precedence */
 :deep(.chat-button-greet-animation) {
-  animation: greet-wave 1s ease-in-out infinite;
+  animation: greet-wave 1s ease-in-out infinite !important;
 }
 </style>
