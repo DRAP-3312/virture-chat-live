@@ -5,6 +5,7 @@ import type { ChatMessage } from "../types/chat";
 
 const props = defineProps<{
   message: ChatMessage;
+  textColor: string;
   userMessageBackground: string;
   userMessageTextColor: string;
   botMessageBackground: string;
@@ -65,9 +66,10 @@ function formatTime(timestamp?: string): string {
     <div
       v-if="message.createdAt"
       :class="[
-        'text-[10px] mt-0.5 opacity-60 text-gray-500',
+        'text-[10px] mt-0.5 opacity-60',
         isUser ? 'text-right' : 'text-left',
       ]"
+      :style="{ color: textColor }"
     >
       {{ formatTime(message.createdAt) }}
     </div>

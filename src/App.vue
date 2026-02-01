@@ -165,8 +165,8 @@ onMounted(() => {
         v-if="showTypingIndicator"
         class="absolute bottom-20 left-[80%] flex items-center px-3 py-2 rounded-[15px_15px_15px_5px] shadow-md z-1000"
         :style="{
-          backgroundColor: resolveTheme('welcomeBackgroundColor'),
-          color: resolveTheme('welcomeTextColor'),
+          backgroundColor: resolveTheme('backgroundColor'),
+          color: resolveTheme('textColor'),
         }"
       >
         <span
@@ -174,7 +174,7 @@ onMounted(() => {
           :key="i"
           class="h-2 w-2 mx-0.5 rounded-full opacity-40 animate-[typing-dots_1.2s_ease-in-out_infinite]"
           :style="{
-            backgroundColor: resolveTheme('welcomeTextColor'),
+            backgroundColor: resolveTheme('textColor'),
             animationDelay: `${(i - 1) * 0.2}s`,
           }"
         ></span>
@@ -192,9 +192,9 @@ onMounted(() => {
       :button-text="
         customStyle.welcomeMessageButton || props.welcomeMessageButton
       "
-      :background-color="resolveTheme('welcomeBackgroundColor')"
-      :text-color="resolveTheme('welcomeTextColor')"
-      :button-color="resolveTheme('welcomeButtonColor')"
+      :background-color="resolveTheme('backgroundColor')"
+      :text-color="resolveTheme('textColor')"
+      :button-color="resolveTheme('accentColor')"
       :show-close-button="customStyle.btn_close_welcome_modal ?? false"
       @start="startChat"
       @dismiss="dismissGreeting"
@@ -205,7 +205,7 @@ onMounted(() => {
       ref="chatButtonRef"
       v-if="!openChat"
       class="w-15 h-15 rounded-full overflow-hidden relative p-0 border-none shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 z-1002 hover:scale-105 flex items-center justify-center cursor-pointer"
-      :style="{ backgroundColor: resolveTheme('chatHeaderBackground') }"
+      :style="{ backgroundColor: resolveTheme('accentColor') }"
       @click="toggleChat"
     >
       <img
@@ -225,13 +225,9 @@ onMounted(() => {
         :send-metrics-now="sendMetricsNow"
         :id-agent="props.idAgent"
         :api-key="props.apiKey"
-        :chat-panel-background="resolveTheme('chatPanelBackground')"
-        :chat-header-background="resolveTheme('chatHeaderBackground')"
-        :chat-header-text-color="resolveTheme('chatHeaderTextColor')"
-        :chat-input-background="resolveTheme('chatInputBackground')"
-        :chat-input-text-color="resolveTheme('chatInputTextColor')"
-        :chat-input-border-color="resolveTheme('chatInputBorderColor')"
-        :send-button-background="resolveTheme('sendButtonBackground')"
+        :background-color="resolveTheme('backgroundColor')"
+        :text-color="resolveTheme('textColor')"
+        :accent-color="resolveTheme('accentColor')"
         :user-message-background="resolveTheme('userMessageBackground')"
         :user-message-text-color="resolveTheme('userMessageTextColor')"
         :bot-message-background="resolveTheme('botMessageBackground')"

@@ -10,7 +10,10 @@ import { getStoredUtms } from "../composables/useUtm";
 import { sendFlexibleEvent, CHAT_EVENTS } from "../utils/analytics";
 import { Filter } from "bad-words";
 import { badWordsSpanishList } from "../utils/bad-words-es";
-import { emitTypingUserState, emitSendChatMessage } from "../services/socketService";
+import {
+  emitTypingUserState,
+  emitSendChatMessage,
+} from "../services/socketService";
 
 interface SocketLike {
   emit: (event: string, ...args: unknown[]) => unknown;
@@ -22,13 +25,9 @@ const props = defineProps<{
   sendMetricsNow: () => void;
   idAgent: string;
   apiKey: string;
-  chatPanelBackground: string;
-  chatHeaderBackground: string;
-  chatHeaderTextColor: string;
-  chatInputBackground: string;
-  chatInputTextColor: string;
-  chatInputBorderColor: string;
-  sendButtonBackground: string;
+  backgroundColor: string;
+  textColor: string;
+  accentColor: string;
   userMessageBackground: string;
   userMessageTextColor: string;
   botMessageBackground: string;
@@ -118,7 +117,9 @@ function sendMessage() {
   });
 
   if (!hasClientMessages) {
-    sendFlexibleEvent(CHAT_EVENTS.SESSION_STARTED, { chat_session_id: userUUID });
+    sendFlexibleEvent(CHAT_EVENTS.SESSION_STARTED, {
+      chat_session_id: userUUID,
+    });
   }
 
   message.value = "";
@@ -171,14 +172,14 @@ onMounted(() => {
     <div
       v-if="isVisible"
       class="fixed inset-0 w-dvw h-dvh rounded-none m-0 flex flex-col overflow-hidden text-xs font-sans lg:relative lg:bottom-20 lg:left-0 lg:h-[70dvh] lg:w-[35vw] xl:w-[23vw] xl:h-[68dvh] lg:rounded-md lg:shadow-xl lg:m-0"
-      :style="{ backgroundColor: chatPanelBackground }"
+      :style="{ backgroundColor: backgroundColor }"
     >
       <!-- Header -->
       <div
         class="flex p-2 w-full h-[10%] justify-between items-center relative"
         :style="{
-          color: chatHeaderTextColor,
-          backgroundColor: chatHeaderBackground,
+          color: textColor,
+          backgroundColor: backgroundColor,
         }"
       >
         <div
@@ -194,7 +195,7 @@ onMounted(() => {
         <div class="flex p-2 grow gap-1 items-center">
           <div
             class="flex flex-col justify-center items-start gap-1"
-            :style="{ color: chatHeaderTextColor }"
+            :style="{ color: textColor }"
           >
             <div class="flex justify-center items-center gap-1 text-sm">
               <strong>Bienvenido a</strong>
@@ -205,24 +206,34 @@ onMounted(() => {
         </div>
         <button
           class="absolute top-2 right-2 bg-transparent border-none text-[22px] font-bold cursor-pointer p-1 rounded-full w-10 h-10 flex items-center justify-center transition-colors duration-200 hover:bg-white/20"
-          :style="{ color: chatHeaderTextColor }"
+          :style="{ color: textColor }"
           @click="handleClose"
         >
           ✕
         </button>
       </div>
 
-      <div class="w-full h-0.5 bg-gray-200" />
+      <div class="w-full h-0.5" :style="{ backgroundColor: textColor }" />
 
       <!-- Permission buttons -->
       <div v-if="!closeModalOption" class="w-full flex flex-col p-2">
         <div
-          class="border border-gray-200 rounded-md hover:bg-gray-50 flex gap-1 justify-between items-start shadow-lg"
+          class="rounded-md flex gap-1 justify-between items-start shadow-lg"
+          :style="{
+            backgroundColor: backgroundColor,
+            border: `1px solid ${textColor}`,
+          }"
         >
           <div class="flex gap-1 p-2 w-full">
             <button
               v-if="!stateBtnUbication"
-              class="flex gap-1 justify-center items-center border border-blue-500 text-gray-600 hover:text-white px-3 py-1 rounded-md hover:bg-blue-600 grow"
+              class="flex gap-1 justify-center items-center px-3 py-1 rounded-md grow transition-all duration-200 hover:shadow-md permission-button"
+              :style="{
+                border: `1px solid ${accentColor}`,
+                color: textColor,
+                backgroundColor: 'transparent',
+                '--accent-color': accentColor,
+              }"
               @click="handleLocationPermission"
             >
               <p class="text-lg">📍</p>
@@ -230,7 +241,13 @@ onMounted(() => {
             </button>
             <button
               v-if="!stateBtnAlerts"
-              class="flex gap-1 justify-center items-center border border-purple-500 text-gray-600 hover:text-white px-3 py-1 rounded-md hover:bg-purple-600 grow"
+              class="flex gap-1 justify-center items-center px-3 py-1 rounded-md grow transition-all duration-200 hover:shadow-md permission-button"
+              :style="{
+                border: `1px solid ${accentColor}`,
+                color: textColor,
+                backgroundColor: 'transparent',
+                '--accent-color': accentColor,
+              }"
               @click="handleAudioPermission"
             >
               <p class="text-lg">🔊</p>
@@ -239,7 +256,8 @@ onMounted(() => {
           </div>
           <div class="flex justify-end items-center">
             <button
-              class="hover:bg-gray-200 text-lg rounded-md w-8 h-8 justify-center items-center"
+              class="text-lg rounded-md w-8 h-8 justify-center items-center transition-colors duration-200 hover:opacity-70"
+              :style="{ color: textColor }"
               @click="setCloseModalOption"
             >
               x
@@ -273,6 +291,7 @@ onMounted(() => {
         </transition>
 
         <ChatMessages
+          :text-color="textColor"
           :user-message-background="userMessageBackground"
           :user-message-text-color="userMessageTextColor"
           :bot-message-background="botMessageBackground"
@@ -283,7 +302,7 @@ onMounted(() => {
       <!-- Input area -->
       <div
         class="flex flex-col h-[10%]"
-        :style="{ backgroundColor: chatInputBackground }"
+        :style="{ backgroundColor: backgroundColor }"
       >
         <transition name="fade-slide" mode="out-in">
           <div
@@ -300,16 +319,16 @@ onMounted(() => {
               placeholder="Enviar mensaje..."
               class="grow p-2 outline-none resize-none text-gray-700 text-base lg:text-xs rounded-md transition duration-150 bg-transparent border border-gray-200 focus:border-gray-200 focus:ring-1 focus:ring-gray-200"
               :style="{
-                backgroundColor: chatInputBackground,
-                color: chatInputTextColor,
-                borderColor: chatInputBorderColor,
+                backgroundColor: backgroundColor,
+                color: textColor,
+                borderColor: textColor,
               }"
               @keyup.enter="handleEnterKey"
               @input="eventTextArea"
-            />
+            ></textarea>
             <button
               class="w-12.5 h-12.5 lg:hidden rounded-md text-white flex items-center justify-center transition-transform duration-200 hover:scale-105"
-              :style="{ backgroundColor: sendButtonBackground }"
+              :style="{ backgroundColor: accentColor }"
               @click="sendMessage"
             >
               <SendHorizontal :size="20" />
@@ -360,5 +379,10 @@ onMounted(() => {
 .feedback-fade-enter-from,
 .feedback-fade-leave-to {
   opacity: 0;
+}
+
+.permission-button:hover {
+  background-color: var(--accent-color) !important;
+  opacity: 0.9;
 }
 </style>

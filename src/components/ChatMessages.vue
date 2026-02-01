@@ -5,6 +5,7 @@ import MessageBubble from './MessageBubble.vue'
 import type { ChatMessage } from '../types/chat'
 
 defineProps<{
+  textColor: string
   userMessageBackground: string
   userMessageTextColor: string
   botMessageBackground: string
@@ -108,6 +109,7 @@ watch(typingState, (state) => {
         v-for="(item, i) in group.messages"
         :key="item._id || i"
         :message="item"
+        :text-color="textColor"
         :user-message-background="userMessageBackground"
         :user-message-text-color="userMessageTextColor"
         :bot-message-background="botMessageBackground"

@@ -15,23 +15,13 @@ export interface Attachment {
 }
 
 export interface ChatTheme {
-  welcomeBackgroundColor: string
-  welcomeTextColor: string
-  welcomeButtonColor: string
-  welcomeButtonHoverColor: string
-  chatPanelBackground: string
-  chatHeaderBackground: string
-  chatHeaderTextColor: string
-  chatMessagesBackground: string
-  chatInputBackground: string
-  chatInputTextColor: string
-  chatInputBorderColor: string
-  sendButtonBackground: string
-  sendButtonHoverBackground: string
-  userMessageBackground: string
-  userMessageTextColor: string
-  botMessageBackground: string
-  botMessageTextColor: string
+  backgroundColor: string           // Fondo general del widget (header, body, input)
+  textColor: string                 // Texto general (header, welcome, inputs)
+  accentColor: string               // Botones y elementos interactivos
+  userMessageBackground: string     // Fondo de mensajes del usuario
+  userMessageTextColor: string      // Texto de mensajes del usuario
+  botMessageBackground: string      // Fondo de mensajes del bot
+  botMessageTextColor: string       // Texto de mensajes del bot
 }
 
 export interface CustomStyle extends Partial<ChatTheme> {
@@ -60,21 +50,11 @@ export interface WidgetProps {
 }
 
 export const DEFAULT_THEME: ChatTheme = {
-  welcomeBackgroundColor: '#333',
-  welcomeTextColor: '#fff',
-  welcomeButtonColor: '#007bff',
-  welcomeButtonHoverColor: '#0056b3',
-  chatPanelBackground: '#ffffff',
-  chatHeaderBackground: '#131844',
-  chatHeaderTextColor: '#ffffff',
-  chatMessagesBackground: '#f8f9fc',
-  chatInputBackground: '#ffffff',
-  chatInputTextColor: '#474747',
-  chatInputBorderColor: '#ccc',
-  sendButtonBackground: '#131844',
-  sendButtonHoverBackground: '#1a205a',
-  userMessageBackground: '#15be86',
-  userMessageTextColor: '#ffffff',
-  botMessageBackground: '#f5f5f5',
-  botMessageTextColor: '#3f3f3f',
+  backgroundColor: '#131844',         // Fondo principal del widget (header, body, input)
+  textColor: '#ffffff',               // Texto general (header, inputs)
+  accentColor: '#007bff',             // Botones y elementos interactivos
+  userMessageBackground: '#15be86',   // Fondo de mensajes del usuario (verde)
+  userMessageTextColor: '#ffffff',    // Texto de mensajes del usuario (blanco)
+  botMessageBackground: '#f5f5f5',    // Fondo de mensajes del bot (gris claro)
+  botMessageTextColor: '#3f3f3f',     // Texto de mensajes del bot (gris oscuro)
 }
