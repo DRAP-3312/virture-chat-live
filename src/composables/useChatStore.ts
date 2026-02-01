@@ -1,12 +1,29 @@
 import { ref } from "vue";
 import type { ChatMessage, CustomStyle } from "../types/chat";
 
+// Cargar estados guardados de localStorage
+const loadSavedPermissions = () => {
+  const savedAlerts = localStorage.getItem("permissionAlerts");
+  const savedUbication = localStorage.getItem("permissionUbication");
+
+  const alerts = savedAlerts === "true";
+  const ubication = savedUbication === "true";
+
+  return {
+    alerts,
+    ubication,
+    shouldCloseModal: alerts && ubication,
+  };
+};
+
+const savedPermissions = loadSavedPermissions();
+
 const messages = ref<ChatMessage[]>([]);
 const openChat = ref(false);
 const customStyle = ref<CustomStyle>({});
-const closeModalOption = ref(false);
-const stateBtnAlerts = ref(false);
-const stateBtnUbication = ref(false);
+const closeModalOption = ref(savedPermissions.shouldCloseModal);
+const stateBtnAlerts = ref(savedPermissions.alerts);
+const stateBtnUbication = ref(savedPermissions.ubication);
 const typingState = ref("");
 
 export function useChatStore() {
@@ -29,10 +46,15 @@ export function useChatStore() {
 
   function setCloseModalOption() {
     closeModalOption.value = true;
+    // Marcar ambos permisos como "vistos" para no mostrar el modal de nuevo
+    localStorage.setItem("permissionAlerts", "true");
+    localStorage.setItem("permissionUbication", "true");
   }
 
   function setStateBtnAlert(val: boolean) {
     stateBtnAlerts.value = val;
+    // Guardar en localStorage
+    localStorage.setItem("permissionAlerts", val.toString());
     if (stateBtnAlerts.value && stateBtnUbication.value) {
       closeModalOption.value = true;
     }
@@ -44,6 +66,8 @@ export function useChatStore() {
 
   function setStateBtnUbication(val: boolean) {
     stateBtnUbication.value = val;
+    // Guardar en localStorage
+    localStorage.setItem("permissionUbication", val.toString());
     if (stateBtnAlerts.value && stateBtnUbication.value) {
       closeModalOption.value = true;
     }

@@ -14,8 +14,17 @@ function getSoundUrl(soundName: string): string | null {
 }
 
 export function useSound() {
-  function enableSound() {
+  async function enableSound() {
     isSoundEnabled.value = true;
+
+    // Solicitar permiso de notificaciones del navegador
+    if ('Notification' in window && Notification.permission === 'default') {
+      try {
+        await Notification.requestPermission();
+      } catch (error) {
+        console.warn('Error al solicitar permiso de notificaciones:', error);
+      }
+    }
   }
 
   async function playSound(soundName: string, volume = 1.0) {

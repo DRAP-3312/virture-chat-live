@@ -136,8 +136,8 @@ async function handleLocationPermission() {
   }
 }
 
-function handleAudioPermission() {
-  enableSound();
+async function handleAudioPermission() {
+  await enableSound();
   setStateBtnAlert(true);
 }
 
