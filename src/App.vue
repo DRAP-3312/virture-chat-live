@@ -353,22 +353,6 @@ onMounted(() => {
   }
 }
 
-/* Enhanced greeting wave animation */
-@keyframes greet-wave {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  25% {
-    transform: translateY(-8px) rotate(-5deg);
-  }
-  50% {
-    transform: translateY(-12px) rotate(0deg);
-  }
-  75% {
-    transform: translateY(-8px) rotate(5deg);
-  }
-}
 
 /* Chat button subtle fade animation */
 .chat-button-appear-enter-active {
@@ -414,8 +398,4 @@ onMounted(() => {
   transform: rotate(15deg);
 }
 
-/* Ensure greet animation takes precedence */
-:deep(.chat-button-greet-animation) {
-  animation: greet-wave 1s ease-in-out infinite !important;
-}
 </style>

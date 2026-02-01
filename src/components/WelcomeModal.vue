@@ -17,7 +17,7 @@ const emit = defineEmits<{
 <template>
   <transition name="greet-modal-bounce">
     <div
-      class="absolute bottom-21.25 left-1.25 p-5 rounded-2xl shadow-2xl text-sm leading-relaxed z-1001 w-[65vw] lg:w-[22vw] backdrop-blur-sm"
+      class="absolute bottom-21.25 left-1.25 p-5 rounded-2xl shadow-2xl text-sm leading-relaxed z-1001 w-[65vw] lg:w-[22vw] backdrop-blur-sm animate-float-subtle"
       :style="{
         backgroundColor,
         color: textColor,
@@ -141,5 +141,20 @@ const emit = defineEmits<{
 
 .animate-ping-slow {
   animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Subtle float animation for the modal */
+@keyframes float-subtle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float-subtle {
+  animation: float-subtle 1.8s ease-in-out infinite;
 }
 </style>
