@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { SendHorizontal } from "lucide-vue-next";
+import type { MessageInputProps } from "../types/props";
 
-const props = defineProps<{
-  backgroundColor: string;
-  textColor: string;
-  accentColor: string;
-  modelValue: string;
-}>();
+const props = defineProps<MessageInputProps>();
 
 const emit = defineEmits<{
   "update:modelValue": [value: string];

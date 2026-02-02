@@ -1,12 +1,7 @@
 <script setup lang="ts">
-defineProps<{
-  instanceName?: string;
-  iconButtonUrl?: string;
-  botMessageBackground?: string;
-  botMessageTextColor?: string;
-  textColor?: string;
-  accentColor?: string;
-}>();
+import type { TypeIndicatorProps } from "../types/props";
+
+defineProps<TypeIndicatorProps>();
 </script>
 
 <template>

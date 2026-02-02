@@ -16,28 +16,9 @@ import {
   emitTypingUserState,
   emitSendChatMessage,
 } from "../services/socketService";
+import type { FormChatProps } from "../types/props";
 
-interface SocketLike {
-  emit: (event: string, ...args: unknown[]) => unknown;
-  on: (event: string, callback: (...args: unknown[]) => void) => unknown;
-}
-
-const props = defineProps<{
-  socket: SocketLike;
-  sendMetricsNow: () => void;
-  idAgent: string;
-  apiKey: string;
-  backgroundColor: string;
-  textColor: string;
-  accentColor: string;
-  userMessageBackground: string;
-  userMessageTextColor: string;
-  botMessageBackground: string;
-  botMessageTextColor: string;
-  instanceName?: string;
-  iconButtonUrl?: string;
-  socketState: boolean;
-}>();
+const props = defineProps<FormChatProps>();
 
 const emit = defineEmits<{
   close: [];

@@ -1,9 +1,7 @@
 <script setup lang="ts">
-defineProps<{
-  date: string;
-  textColor: string;
-  backgroundColor: string;
-}>();
+import type { DateSepatorProps } from "../types/props";
+
+defineProps<DateSepatorProps>();
 </script>
 
 <template>

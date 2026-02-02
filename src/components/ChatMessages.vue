@@ -4,17 +4,9 @@ import { useChatStore } from "../composables/useChatStore";
 import MessageBubble from "./MessageBubble.vue";
 import DateSeparator from "./DateSeparator.vue";
 import type { ChatMessage } from "../types/chat";
+import type { ChatMessageProps } from "../types/props";
 
-defineProps<{
-  backgroundColor: string;
-  textColor: string;
-  userMessageBackground: string;
-  userMessageTextColor: string;
-  botMessageBackground: string;
-  botMessageTextColor: string;
-  iconButtonUrl?: string;
-  instanceName?: string;
-}>();
+defineProps<ChatMessageProps>();
 
 const { messages, typingState } = useChatStore();
 const messagesContainer = ref<HTMLDivElement | null>(null);

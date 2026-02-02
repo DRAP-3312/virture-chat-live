@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { FileText, Download, ImageOff } from "lucide-vue-next";
-import type { Attachment } from "../types/chat";
+import type { MessageAttachmentProps } from "../types/props";
 
-const props = defineProps<{
-  attachment: Attachment;
-  isMultiple?: boolean;
-}>();
+const props = defineProps<MessageAttachmentProps>();
 
 const loading = ref(true);
 const error = ref(false);

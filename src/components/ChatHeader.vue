@@ -1,12 +1,7 @@
 <script setup lang="ts">
-defineProps<{
-  instanceName?: string;
-  iconButtonUrl?: string;
-  backgroundColor: string;
-  textColor: string;
-  accentColor: string;
-  socketState: boolean;
-}>();
+import type { ChatHeaderProps } from "../types/props";
+
+defineProps<ChatHeaderProps>();
 
 const emit = defineEmits<{
   close: [];

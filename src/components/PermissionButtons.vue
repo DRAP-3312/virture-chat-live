@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import type { PermissionButtonsProps } from "../types/props";
 
-defineProps<{
-  textColor: string;
-  accentColor: string;
-  stateBtnUbication: boolean;
-  stateBtnAlerts: boolean;
-}>();
+defineProps<PermissionButtonsProps>();
 
 const emit = defineEmits<{
   requestLocation: [];

@@ -10,37 +10,26 @@ import {
   sendFlexibleEvent,
   CHAT_EVENTS,
 } from "./utils/analytics";
-import { DEFAULT_THEME, type ChatTheme, type WidgetPosition } from "./types/chat";
+import {
+  DEFAULT_THEME,
+  type ChatTheme,
+  type WidgetPosition,
+} from "./types/chat";
 import "./style.css";
+import type { WidgetProps } from "./types/props";
 
-const props = withDefaults(
-  defineProps<{
-    socketUrl?: string;
-    idAgent?: string;
-    apiKey?: string;
-    nameSpace?: string;
-    gaTrackingId?: string;
-    welcomeMessage?: string;
-    iconButton?: string;
-    welcomeMessageButton?: string;
-    soundName?: string;
-    instanceName?: string;
-    theme?: Partial<ChatTheme>;
-    position?: WidgetPosition | string;
-  }>(),
-  {
-    socketUrl: "http://localhost:7777",
-    idAgent: "65d7a475abc4c71e14dee693",
-    apiKey: "api",
-    nameSpace: "/chat",
-    gaTrackingId: "",
-    welcomeMessage: "Hola que tal",
-    iconButton: "",
-    welcomeMessageButton: "Chatear Ahora!",
-    soundName: "sound1",
-    instanceName: "Dev V2",
-  },
-);
+const props = withDefaults(defineProps<WidgetProps>(), {
+  socketUrl: "http://localhost:7777",
+  idAgent: "65d7a475abc4c71e14dee693",
+  apiKey: "api",
+  nameSpace: "/chat",
+  gaTrackingId: "",
+  welcomeMessage: "Hola que tal",
+  iconButton: "",
+  welcomeMessageButton: "Chatear Ahora!",
+  soundName: "sound1",
+  instanceName: "Dev V2",
+});
 
 // Parse position prop (comes as JSON string from custom element attributes)
 const parsedPosition = computed<WidgetPosition>(() => {
@@ -203,7 +192,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="chat-container text-sm" :class="{ 'chat-open': openChat, 'chat-fixed': isFixedMode }" :style="containerStyle">
+  <div
+    class="chat-container text-sm"
+    :class="{ 'chat-open': openChat, 'chat-fixed': isFixedMode }"
+    :style="containerStyle"
+  >
     <!-- Typing indicator dots with enhanced animation -->
     <transition name="typing-bounce">
       <div
@@ -392,7 +385,6 @@ onMounted(() => {
   }
 }
 
-
 /* Chat button subtle fade animation */
 .chat-button-appear-enter-active {
   transition: opacity 0.3s ease-out;
@@ -436,5 +428,4 @@ onMounted(() => {
 .chat-button:hover .w-7 {
   transform: rotate(15deg);
 }
-
 </style>

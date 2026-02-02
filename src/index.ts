@@ -1,5 +1,6 @@
-import App from './App.vue'
+import App from "./App.vue";
 
-export { App as ChatWidget }
-export { App as default }
-export type { ChatTheme, WidgetPosition, WidgetProps } from './types/chat'
+export { App as ChatWidget };
+export { App as default };
+export type { ChatTheme, WidgetPosition } from "./types/chat";
+export type { WidgetProps } from "./types/props";

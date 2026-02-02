@@ -1,18 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { parseMessageContent } from "../utils/markdown";
-import type { ChatMessage } from "../types/chat";
 
-const props = defineProps<{
-  message: ChatMessage;
-  textColor: string;
-  userMessageBackground: string;
-  userMessageTextColor: string;
-  botMessageBackground: string;
-  botMessageTextColor: string;
-  iconButtonUrl?: string;
-  instanceName?: string;
-}>();
+const props = defineProps<MessageBubbleProps>();
 
 const isUser = computed(() => props.message.role === "user");
 
@@ -110,6 +100,7 @@ function formatTime(timestamp?: string): string {
 
 <script lang="ts">
 import MessageAttachment from "./MessageAttachment.vue";
+import type { MessageBubbleProps } from "../types/props";
 </script>
 
 <style scoped>
