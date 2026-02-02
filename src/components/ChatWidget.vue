@@ -184,6 +184,7 @@ onMounted(() => {
         class="flex flex-col grow overflow-y-auto bg-transparent p-2 relative"
       >
         <ChatMessages
+          :background-color="backgroundColor"
           :text-color="textColor"
           :user-message-background="userMessageBackground"
           :user-message-text-color="userMessageTextColor"

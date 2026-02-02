@@ -65,7 +65,7 @@ defineExpose({ focusInput });
       :style="{
         backgroundColor: `${textColor}05`,
         color: textColor,
-        border: `1.5px solid ${textColor}15`,
+        border: `1.5px solid ${textColor}`,
         '--tw-ring-color': `${accentColor}30`,
       }"
       rows="1"

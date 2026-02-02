@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, shallowRef, onMounted, onUnmounted, type ShallowRef, type Ref } from "vue";
 import { Manager, type Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { useChatStore } from "./useChatStore";
@@ -70,9 +70,14 @@ export function useSocket(
   apiKey: string,
   nameSpace: string,
   soundName: string,
-) {
-  const socket = ref<Socket | null>(null);
-  const manager = ref<Manager | null>(null);
+): {
+  socket: ShallowRef<Socket | null>;
+  manager: ShallowRef<Manager | null>;
+  sendMetricsNow: () => void;
+  socketState: Ref<boolean>;
+} {
+  const socket = shallowRef<Socket | null>(null);
+  const manager = shallowRef<Manager | null>(null);
   const navigationInterval = ref<ReturnType<typeof setInterval> | null>(null);
   const widgetInterval = ref<ReturnType<typeof setInterval> | null>(null);
   const metricsInterval = ref<ReturnType<typeof setInterval> | null>(null);

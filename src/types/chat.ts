@@ -47,6 +47,18 @@ export interface WidgetProps {
   soundName?: string
   instanceName?: string
   theme?: Partial<ChatTheme>
+  position?: WidgetPosition
+}
+
+export type PositionMode = 'fixed' | 'absolute' | 'relative'
+
+export interface WidgetPosition {
+  mode?: PositionMode
+  top?: string
+  right?: string
+  bottom?: string
+  left?: string
+  zIndex?: number
 }
 
 export const DEFAULT_THEME: ChatTheme = {

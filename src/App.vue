@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { MessageCircle } from "lucide-vue-next";
 import ChatWidget from "./components/ChatWidget.vue";
 import WelcomeModal from "./components/WelcomeModal.vue";
@@ -10,7 +10,7 @@ import {
   sendFlexibleEvent,
   CHAT_EVENTS,
 } from "./utils/analytics";
-import { DEFAULT_THEME, type ChatTheme } from "./types/chat";
+import { DEFAULT_THEME, type ChatTheme, type WidgetPosition } from "./types/chat";
 import "./style.css";
 
 const props = withDefaults(
@@ -26,6 +26,7 @@ const props = withDefaults(
     soundName?: string;
     instanceName?: string;
     theme?: Partial<ChatTheme>;
+    position?: WidgetPosition | string;
   }>(),
   {
     socketUrl: "http://localhost:7777",
@@ -40,6 +41,47 @@ const props = withDefaults(
     instanceName: "Dev V2",
   },
 );
+
+// Parse position prop (comes as JSON string from custom element attributes)
+const parsedPosition = computed<WidgetPosition>(() => {
+  if (!props.position) return {};
+  if (typeof props.position === "string") {
+    try {
+      return JSON.parse(props.position) as WidgetPosition;
+    } catch {
+      return {};
+    }
+  }
+  return props.position;
+});
+
+const positionMode = computed(() => parsedPosition.value.mode || "fixed");
+const isFixedMode = computed(() => positionMode.value === "fixed");
+
+const containerStyle = computed(() => {
+  const pos = parsedPosition.value;
+  const mode = pos.mode || "fixed";
+  const style: Record<string, string> = {
+    position: mode,
+    zIndex: String(pos.zIndex ?? 1000),
+  };
+
+  if (mode === "fixed") {
+    // Default fixed behavior: bottom-left corner
+    style.bottom = pos.bottom ?? "20px";
+    style.left = pos.left ?? "30px";
+    if (pos.top) style.top = pos.top;
+    if (pos.right) style.right = pos.right;
+  } else {
+    // For absolute/relative, only set values that were explicitly provided
+    if (pos.top) style.top = pos.top;
+    if (pos.right) style.right = pos.right;
+    if (pos.bottom) style.bottom = pos.bottom;
+    if (pos.left) style.left = pos.left;
+  }
+
+  return style;
+});
 
 const chatButtonRef = ref<HTMLButtonElement | null>(null);
 const showGreetingModal = ref(false);
@@ -161,7 +203,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="chat-container text-sm" :class="{ 'chat-open': openChat }">
+  <div class="chat-container text-sm" :class="{ 'chat-open': openChat, 'chat-fixed': isFixedMode }" :style="containerStyle">
     <!-- Typing indicator dots with enhanced animation -->
     <transition name="typing-bounce">
       <div
@@ -259,41 +301,38 @@ onMounted(() => {
 
 <style scoped>
 .chat-container {
-  position: fixed;
-  bottom: 20px;
-  left: 30px;
-  z-index: 1000;
+  box-sizing: border-box;
 }
 
 @media (max-width: 800px) {
-  .chat-container {
+  .chat-container.chat-fixed {
     left: 10px;
   }
 }
 
 @media (max-width: 768px) {
-  .chat-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: 0;
+  .chat-container.chat-fixed.chat-open {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
     z-index: 1000;
   }
 
-  .chat-container:not(.chat-open) {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    right: auto;
-    top: auto;
+  .chat-container.chat-fixed:not(.chat-open) {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    right: auto !important;
+    top: auto !important;
   }
 
-  .chat-container.chat-open button[class*="rounded-full"] {
+  .chat-container.chat-fixed.chat-open button[class*="rounded-full"] {
     display: none;
   }
 
-  .chat-container.chat-open > div:last-child {
+  .chat-container.chat-fixed.chat-open > div:last-child {
     position: fixed;
     bottom: 0;
     left: 0;

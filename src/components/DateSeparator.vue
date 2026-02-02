@@ -2,6 +2,7 @@
 defineProps<{
   date: string;
   textColor: string;
+  backgroundColor: string;
 }>();
 </script>
 
@@ -10,9 +11,10 @@ defineProps<{
     <div
       class="px-3 py-1.5 text-[10px] rounded-full font-medium text-center backdrop-blur-sm"
       :style="{
-        backgroundColor: `${textColor}08`,
-        color: `${textColor}70`,
-        border: `1px solid ${textColor}10`,
+        backgroundColor: backgroundColor,
+        color: textColor,
+        border: `1px solid ${textColor}`,
+        opacity: 0.7,
       }"
     >
       {{ date }}

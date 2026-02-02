@@ -6,6 +6,7 @@ import DateSeparator from "./DateSeparator.vue";
 import type { ChatMessage } from "../types/chat";
 
 defineProps<{
+  backgroundColor: string;
   textColor: string;
   userMessageBackground: string;
   userMessageTextColor: string;
@@ -108,6 +109,7 @@ watch(typingState, (state) => {
         v-if="group.formattedDate"
         :date="group.formattedDate"
         :text-color="textColor"
+        :background-color="backgroundColor"
       />
 
       <MessageBubble
