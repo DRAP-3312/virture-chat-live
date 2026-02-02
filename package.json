@@ -1,7 +1,7 @@
 {
   "name": "virture-chat-live",
   "private": false,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "main": "./dist/virture-chat-live.umd.js",
   "module": "./dist/virture-chat-live.es.js",
