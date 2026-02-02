@@ -115,3 +115,7 @@ export interface WelcomeModalProps {
   buttonColor: string;
   showCloseButton: boolean;
 }
+
+export interface ToolTipProps {
+  position?: "top" | "bottom";
+}

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { FileText, Download, ImageOff } from "lucide-vue-next";
+import TooltipHover from "./TooltipHover.vue";
 import type { MessageAttachmentProps } from "../types/props";
 
 const props = defineProps<MessageAttachmentProps>();
@@ -117,31 +118,24 @@ function formatFileSize(bytes: number): string {
     </div>
 
     <!-- PDF -->
-    <div
-      v-else-if="isPdf"
-      class="group flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-300 w-full bg-slate-700 hover:bg-slate-600 hover:shadow-lg hover:scale-[1.02]"
-      @click="openUrl"
-      @mouseover="focusImg = true"
-      @mouseleave="focusImg = false"
-    >
+    <TooltipHover v-else-if="isPdf">
       <div
-        class="shrink-0 flex flex-col items-center transition-transform group-hover:scale-110"
+        class="group flex flex-col items-center justify-center w-14 h-14 rounded-lg cursor-pointer transition-all duration-300 bg-slate-700 hover:bg-slate-600 hover:shadow-lg hover:scale-[1.05]"
+        @click="openUrl"
       >
-        <FileText :size="32" class="text-red-500" />
-        <p class="text-sm font-medium text-white mt-2">PDF</p>
+        <FileText :size="24" class="text-red-500" />
+        <p class="text-[10px] font-semibold text-white mt-0.5">PDF</p>
       </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-white truncate">
+      <template #content>
+        <p class="text-xs font-medium text-white truncate max-w-48">
           {{ attachment.fileName }}
         </p>
-        <p class="text-xs text-gray-200">
+        <p class="text-[10px] text-gray-300">
           {{ formatFileSize(attachment.fileSize) }}
         </p>
-        <p v-if="focusImg" class="text-xs text-purple-300 mt-1">
-          Click para abrir
-        </p>
-      </div>
-    </div>
+        <p class="text-[10px] text-purple-300 mt-0.5">Click para abrir</p>
+      </template>
+    </TooltipHover>
 
     <!-- Other files -->
     <div

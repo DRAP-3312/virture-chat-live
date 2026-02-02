@@ -73,7 +73,7 @@ function sendMessage() {
   const userUUID = localStorage.getItem("userUUID") ?? "";
   const utms = getStoredUtms();
 
-  addMessage({ content: valueToSend, role: "user" });
+  addMessage({ content: valueToSend, role: "user", createdAt: new Date().toISOString() });
   emitSendChatMessage(
     props.socket,
     {

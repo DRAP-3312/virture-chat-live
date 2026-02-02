@@ -24,11 +24,11 @@ const props = withDefaults(defineProps<WidgetProps>(), {
   apiKey: "api",
   nameSpace: "/chat",
   gaTrackingId: "",
-  welcomeMessage: "Hola que tal",
+  welcomeMessage: "Bienvenido",
   iconButton: "",
   welcomeMessageButton: "Chatear Ahora!",
   soundName: "sound1",
-  instanceName: "Dev V2",
+  instanceName: "",
 });
 
 // Parse position prop (comes as JSON string from custom element attributes)
