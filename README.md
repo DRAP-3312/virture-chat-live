@@ -12,36 +12,38 @@ npm install virture-chat-live
 
 ```vue
 <script setup>
-import { ChatWidget } from 'virture-chat-live'
-import 'virture-chat-live/style.css'
+import { ChatWidget } from "virture-chat-live";
+import "virture-chat-live/style.css";
 </script>
 
 <template>
   <ChatWidget
-    socket-url="https://tu-servidor.com"
-    id-agent="tu-agent-id"
-    api-key="tu-api-key"
-    name-space="/chat"
+    :socket-url="widgetConfig.socketUrl"
+    :id-agent="widgetConfig.idAgent"
+    :api-key="widgetConfig.apiKey"
+    :name-space="widgetConfig.nameSpace"
+    :instance-name="widgetConfig.instanceName"
+    :gaTrackingId="''"
   />
 </template>
 ```
 
 ## Props
 
-| Prop | Tipo | Default | Descripcion |
-|---|---|---|---|
-| `socket-url` | `string` | — | URL del servidor Socket.IO |
-| `id-agent` | `string` | — | ID del agente |
-| `api-key` | `string` | — | API key de autenticacion |
-| `name-space` | `string` | `"/chat"` | Namespace de Socket.IO |
-| `welcome-message` | `string` | `"Hola que tal"` | Mensaje de bienvenida |
-| `welcome-message-button` | `string` | `"Chatear Ahora!"` | Texto del boton de bienvenida |
-| `icon-button` | `string` | — | URL de icono personalizado para el boton |
-| `sound-name` | `string` | `"sound1"` | Nombre del sonido de notificacion |
-| `instance-name` | `string` | — | Nombre de la instancia |
-| `ga-tracking-id` | `string` | — | ID de Google Analytics |
-| `theme` | `Partial<ChatTheme>` | — | Objeto para personalizar colores |
-| `position` | `WidgetPosition` | — | Posicion del widget |
+| Prop                     | Tipo                 | Default            | Descripcion                              |
+| ------------------------ | -------------------- | ------------------ | ---------------------------------------- |
+| `socket-url`             | `string`             | —                  | URL del servidor Socket.IO               |
+| `id-agent`               | `string`             | —                  | ID del agente                            |
+| `api-key`                | `string`             | —                  | API key de autenticacion                 |
+| `name-space`             | `string`             | `"/chat"`          | Namespace de Socket.IO                   |
+| `welcome-message`        | `string`             | `"Hola que tal"`   | Mensaje de bienvenida                    |
+| `welcome-message-button` | `string`             | `"Chatear Ahora!"` | Texto del boton de bienvenida            |
+| `icon-button`            | `string`             | —                  | URL de icono personalizado para el boton |
+| `sound-name`             | `string`             | `"sound1"`         | Nombre del sonido de notificacion        |
+| `instance-name`          | `string`             | —                  | Nombre de la instancia                   |
+| `ga-tracking-id`         | `string`             | —                  | ID de Google Analytics                   |
+| `theme`                  | `Partial<ChatTheme>` | —                  | Objeto para personalizar colores         |
+| `position`               | `WidgetPosition`     | —                  | Posicion del widget                      |
 
 ## Personalizar tema
 
@@ -57,7 +59,7 @@ import 'virture-chat-live/style.css'
     userMessageBackground: '#e94560',
     userMessageTextColor: '#ffffff',
     botMessageBackground: '#16213e',
-    botMessageTextColor: '#ffffff'
+    botMessageTextColor: '#ffffff',
   }"
 />
 ```
@@ -73,7 +75,7 @@ import 'virture-chat-live/style.css'
     mode: 'fixed',
     bottom: '20px',
     right: '20px',
-    zIndex: 9999
+    zIndex: 9999,
   }"
 />
 ```
@@ -83,7 +85,7 @@ Modos disponibles: `fixed`, `absolute`, `relative`.
 ## Tipos exportados
 
 ```ts
-import type { ChatTheme, WidgetPosition, WidgetProps } from 'virture-chat-live'
+import type { ChatTheme, WidgetPosition, WidgetProps } from "virture-chat-live";
 ```
 
 ## Desarrollo
