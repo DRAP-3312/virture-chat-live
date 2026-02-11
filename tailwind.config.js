@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
+  important: '.chat-container',
   corePlugins: {
     preflight: false,
   },
