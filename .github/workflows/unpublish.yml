@@ -1,0 +1,32 @@
+name: Unpublish from npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      versions:
+        description: 'Versions to unpublish (comma-separated, e.g. 1.0.3,1.0.4,1.0.5)'
+        required: true
+        type: string
+
+jobs:
+  unpublish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Unpublish versions
+        run: |
+          IFS=',' read -ra VERSIONS <<< "${{ inputs.versions }}"
+          for VERSION in "${VERSIONS[@]}"; do
+            VERSION=$(echo "$VERSION" | xargs)
+            echo "Unpublishing virture-chat-live@${VERSION}..."
+            npm unpublish "virture-chat-live@${VERSION}"
+            echo "Successfully unpublished version ${VERSION}"
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
