@@ -3,7 +3,7 @@
   "private": false,
   "version": "1.0.2",
   "type": "module",
-  "main": "./dist/virture-chat-live.cjs.js",
+  "main": "./dist/virture-chat-live.umd.js",
   "module": "./dist/virture-chat-live.es.js",
   "types": "./dist/index.d.ts",
   "author": {
@@ -14,11 +14,11 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/virture-chat-live.es.js",
-      "require": "./dist/virture-chat-live.cjs.js"
+      "require": "./dist/virture-chat-live.umd.js"
     },
     "./widget": {
       "import": "./dist/widget-entry.es.js",
-      "require": "./dist/widget-entry.cjs.js"
+      "require": "./dist/widget-entry.umd.js"
     },
     "./style.css": "./dist/style.css"
   },
@@ -29,6 +29,8 @@
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "build:lib": "vue-tsc -b && vite build --mode production",
+    "build:widget": "vite build --mode widget",
+    "build:all": "npm run build:lib && npm run build:widget",
     "preview": "vite preview"
   },
   "peerDependencies": {
