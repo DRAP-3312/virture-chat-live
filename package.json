@@ -3,7 +3,7 @@
   "private": false,
   "version": "1.0.2",
   "type": "module",
-  "main": "./dist/virture-chat-live.umd.js",
+  "main": "./dist/virture-chat-live.cjs.js",
   "module": "./dist/virture-chat-live.es.js",
   "types": "./dist/index.d.ts",
   "author": {
@@ -14,7 +14,11 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/virture-chat-live.es.js",
-      "require": "./dist/virture-chat-live.umd.js"
+      "require": "./dist/virture-chat-live.cjs.js"
+    },
+    "./widget": {
+      "import": "./dist/widget-entry.es.js",
+      "require": "./dist/widget-entry.cjs.js"
     },
     "./style.css": "./dist/style.css"
   },

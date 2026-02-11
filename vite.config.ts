@@ -24,9 +24,12 @@ export default defineConfig(({ mode }) => {
     build: isLibBuild
       ? {
           lib: {
-            entry: resolve(__dirname, 'src/index.ts'),
+            entry: {
+              'virture-chat-live': resolve(__dirname, 'src/index.ts'),
+              'widget-entry': resolve(__dirname, 'src/widget-entry.ts'),
+            },
             name: 'VirtureChatLive',
-            fileName: (format) => `virture-chat-live.${format}.js`,
+            fileName: (format, entryName) => `${entryName}.${format}.js`,
           },
           rollupOptions: {
             external: ['vue'],
