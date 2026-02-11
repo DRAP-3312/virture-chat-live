@@ -4,13 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version bump (patch: 1.0.x, minor: 1.x.0, major: x.0.0)'
+        description: 'Version to publish (e.g. 1.0.3)'
         required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
+        type: string
 
 jobs:
   publish:
@@ -27,8 +23,8 @@ jobs:
 
       - run: npm ci
 
-      - name: Bump version
-        run: npm version ${{ inputs.version }} --no-git-tag-version
+      - name: Set version
+        run: npm version ${{ inputs.version }} --no-git-tag-version --allow-same-version
 
       - run: npm run build:lib
 
