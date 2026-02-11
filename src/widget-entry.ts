@@ -1,8 +1,10 @@
 import { defineCustomElement } from 'vue'
 import App from './App.vue'
-import './style.css'
+import baseStyles from './style.css?inline'
 
-const ChatElement = defineCustomElement(App as any)
+const ChatElement = defineCustomElement(App as any, {
+  styles: [baseStyles],
+})
 
 customElements.define('vue-chat-widget', ChatElement)
 
