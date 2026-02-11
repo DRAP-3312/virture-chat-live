@@ -48,7 +48,7 @@ function formatFileSize(bytes: number): string {
         ]"
       >
         <div
-          class="w-7.5 h-7.5 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"
+          class="w-[1.875rem] h-[1.875rem] border-[3px] border-gray-200 border-t-blue-500 rounded-full animate-spin"
         ></div>
       </div>
 
@@ -127,7 +127,7 @@ function formatFileSize(bytes: number): string {
         <p class="text-[10px] font-semibold text-white mt-0.5">PDF</p>
       </div>
       <template #content>
-        <p class="text-xs font-medium text-white truncate max-w-48">
+        <p class="text-xs font-medium text-white truncate max-w-[12rem]">
           {{ attachment.fileName }}
         </p>
         <p class="text-[10px] text-gray-300">

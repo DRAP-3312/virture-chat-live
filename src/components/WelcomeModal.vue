@@ -12,7 +12,7 @@ const emit = defineEmits<{
 <template>
   <transition name="greet-modal-bounce">
     <div
-      class="absolute bottom-21.25 left-1.25 p-5 rounded-2xl shadow-2xl text-sm leading-relaxed z-1001 w-[65vw] lg:w-[22vw] backdrop-blur-sm animate-float-subtle"
+      class="absolute bottom-[5.3125rem] left-[0.3125rem] p-5 rounded-2xl shadow-2xl text-sm leading-relaxed z-[1001] w-[65vw] lg:w-[22vw] backdrop-blur-sm animate-float-subtle"
       :style="{
         backgroundColor,
         color: textColor,

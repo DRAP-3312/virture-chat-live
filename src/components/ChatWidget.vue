@@ -134,7 +134,7 @@ onMounted(() => {
   <transition name="slide-fade">
     <div
       v-if="isVisible"
-      class="fixed inset-0 w-dvw h-dvh rounded-none m-0 flex flex-col overflow-hidden text-xs font-sans lg:relative lg:bottom-20 lg:left-0 lg:h-[70dvh] lg:w-[35vw] xl:w-[23vw] xl:h-[68dvh] lg:rounded-md lg:shadow-xl lg:m-0"
+      class="fixed inset-0 w-[100dvw] h-[100dvh] rounded-none m-0 flex flex-col overflow-hidden text-xs font-sans lg:relative lg:bottom-20 lg:left-0 lg:h-[70dvh] lg:w-[35vw] xl:w-[23vw] xl:h-[68dvh] lg:rounded-md lg:shadow-xl lg:m-0"
       :style="{ backgroundColor: backgroundColor }"
     >
       <!-- Header -->

@@ -201,7 +201,7 @@ onMounted(() => {
     <transition name="typing-bounce">
       <div
         v-if="showTypingIndicator"
-        class="absolute bottom-20 left-[80%] flex items-center px-4 py-2.5 rounded-[16px_16px_16px_4px] shadow-lg z-1000 backdrop-blur-sm"
+        class="absolute bottom-20 left-[80%] flex items-center px-4 py-2.5 rounded-[16px_16px_16px_4px] shadow-lg z-[1000] backdrop-blur-sm"
         :style="{
           backgroundColor: resolveTheme('backgroundColor'),
           color: resolveTheme('textColor'),
@@ -245,7 +245,7 @@ onMounted(() => {
       <button
         ref="chatButtonRef"
         v-if="!openChat"
-        class="w-15 h-15 rounded-full overflow-hidden relative p-0 border-none shadow-lg transition-all duration-300 z-1002 hover:scale-110 hover:shadow-xl active:scale-95 flex items-center justify-center cursor-pointer chat-button"
+        class="w-[3.75rem] h-[3.75rem] rounded-full overflow-hidden relative p-0 border-none shadow-lg transition-all duration-300 z-[1002] hover:scale-110 hover:shadow-xl active:scale-95 flex items-center justify-center cursor-pointer chat-button"
         :style="{
           backgroundColor: resolveTheme('accentColor'),
           boxShadow: `0 8px 16px ${resolveTheme('accentColor')}40, 0 4px 8px rgba(0,0,0,0.1)`,

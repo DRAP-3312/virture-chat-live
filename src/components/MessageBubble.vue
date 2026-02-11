@@ -54,7 +54,7 @@ function formatTime(timestamp?: string): string {
       <div
         v-if="message.attachments?.length"
         :class="[
-          'flex flex-col gap-2 w-full max-w-75',
+          'flex flex-col gap-2 w-full max-w-[18.75rem]',
           message.attachments.some((a) => a.mimeType?.startsWith('image/'))
             ? 'grid grid-cols-3 gap-2'
             : '',
@@ -71,7 +71,7 @@ function formatTime(timestamp?: string): string {
       <!-- Text content -->
       <div
         v-if="message.content"
-        class="message-bubble min-w-10 wrap-break-word px-4 py-2.5 font-sans text-sm transition-all duration-200 shadow-sm"
+        class="message-bubble min-w-[2.5rem] break-words px-4 py-2.5 font-sans text-sm transition-all duration-200 shadow-sm"
         :style="{
           backgroundColor: isUser
             ? userMessageBackground
