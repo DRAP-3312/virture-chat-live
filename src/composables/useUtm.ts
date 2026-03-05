@@ -8,8 +8,6 @@ export function captureUtm(url: string): void {
       utmObject[key] = value;
     }
   }
-
-  utmObject.campaign = searchParams.get("utm_campaign") ?? null;
   localStorage.setItem("utm_obj", JSON.stringify(utmObject));
 }
 
