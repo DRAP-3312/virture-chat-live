@@ -1,30 +1,11 @@
-const PARAMS_TO_CAPTURE = [
-  "utm_source",
-  "utm_medium",
-  "utm_term",
-  "utm_content",
-  "utm_campaign",
-  "gclid",
-  "wbraid",
-  "gbraid",
-  "crm_link",
-  "adSet",
-  "ad",
-  "form",
-  "gad_campaignid",
-  "gad_source",
-  "zones",
-] as const;
-
 export function captureUtm(url: string): void {
   const parsedUrl = new URL(url);
   const searchParams = parsedUrl.searchParams;
   const utmObject: Record<string, string | null> = {};
 
-  for (const param of PARAMS_TO_CAPTURE) {
-    const value = searchParams.get(param);
+  for (const [key, value] of searchParams) {
     if (value) {
-      utmObject[param] = value;
+      utmObject[key] = value;
     }
   }
 
