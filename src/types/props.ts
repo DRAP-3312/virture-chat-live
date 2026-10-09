@@ -48,8 +48,6 @@ export interface SocketLike {
 export interface FormChatProps {
   socket: SocketLike;
   sendMetricsNow: () => void;
-  idAgent: string;
-  apiKey: string;
   backgroundColor: string;
   textColor: string;
   accentColor: string;

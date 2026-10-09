@@ -3,6 +3,24 @@ import { computed } from "vue";
 import { parseMessageContent } from "../utils/markdown";
 
 const props = defineProps<MessageBubbleProps>();
+const emit = defineEmits<{ retry: [clientMessageId: string] }>();
+
+const ERROR_TEXT: Record<string, string> = {
+  conversation_locked: "La conversación está cerrada",
+  rate_limited: "Demasiados mensajes, intenta en un momento",
+  invalid_message: "Mensaje no válido",
+  offline: "Sin conexión",
+  timeout: "No se pudo confirmar el envío",
+};
+const errorText = computed(
+  () => ERROR_TEXT[props.message.errorCode ?? ""] ?? "No se pudo enviar",
+);
+const canRetry = computed(
+  () =>
+    !!props.message.clientMessageId &&
+    props.message.errorCode !== "invalid_message" &&
+    props.message.errorCode !== "conversation_locked",
+);
 
 const isUser = computed(() => props.message.role === "user");
 
@@ -93,6 +111,22 @@ function formatTime(timestamp?: string): string {
         :style="{ color: textColor }"
       >
         {{ formatTime(message.createdAt) }}
+        <span v-if="message.status === 'sending'"> · Enviando…</span>
+      </div>
+
+      <div
+        v-if="message.status === 'error'"
+        class="text-[10px] px-1 text-right text-red-500"
+      >
+        {{ errorText }}
+        <button
+          v-if="canRetry"
+          type="button"
+          class="underline ml-1 cursor-pointer"
+          @click="emit('retry', message.clientMessageId!)"
+        >
+          Reintentar
+        </button>
       </div>
     </div>
   </div>

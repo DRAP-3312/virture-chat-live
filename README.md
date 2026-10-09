@@ -35,7 +35,7 @@ import "virture-chat-live/style.css";
 | `socket-url`             | `string`             | —                  | URL del servidor Socket.IO               |
 | `id-agent`               | `string`             | —                  | ID del agente                            |
 | `api-key`                | `string`             | —                  | API key de autenticacion                 |
-| `name-space`             | `string`             | `"/chat"`          | Namespace de Socket.IO                   |
+| `name-space`             | `string`             | `"/v2/widget"`     | Namespace de Socket.IO                   |
 | `welcome-message`        | `string`             | `"Hola que tal"`   | Mensaje de bienvenida                    |
 | `welcome-message-button` | `string`             | `"Chatear Ahora!"` | Texto del boton de bienvenida            |
 | `icon-button`            | `string`             | —                  | URL de icono personalizado para el boton |

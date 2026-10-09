@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<WidgetProps>(), {
   socketUrl: "http://localhost:7777",
   idAgent: "65d7a475abc4c71e14dee693",
   apiKey: "api",
-  nameSpace: "/chat",
+  nameSpace: "/v2/widget",
   gaTrackingId: "",
   welcomeMessage: "Bienvenido",
   iconButton: "",
@@ -274,8 +274,6 @@ onMounted(() => {
         v-if="chatSocket"
         :socket="chatSocket"
         :send-metrics-now="sendMetricsNow"
-        :id-agent="props.idAgent"
-        :api-key="props.apiKey"
         :background-color="resolveTheme('backgroundColor')"
         :text-color="resolveTheme('textColor')"
         :accent-color="resolveTheme('accentColor')"

@@ -8,7 +8,14 @@ import type { ChatMessageProps } from "../types/props";
 
 defineProps<ChatMessageProps>();
 
-const { messages, typingState } = useChatStore();
+const emit = defineEmits<{
+  retry: [clientMessageId: string];
+  "load-older": [done: () => void];
+}>();
+
+const { messages, typingState, hasMore } = useChatStore();
+let loadingOlder = false;
+let prepending = false;
 const messagesContainer = ref<HTMLDivElement | null>(null);
 
 const filteredMessages = computed(() =>
@@ -84,10 +91,34 @@ function scrollToBottom() {
   });
 }
 
+function onScroll() {
+  const el = messagesContainer.value;
+  if (!el || loadingOlder || !hasMore.value || el.scrollTop > 40) return;
+  loadingOlder = true;
+  prepending = true;
+  const prevHeight = el.scrollHeight;
+  emit("load-older", () => {
+    nextTick(() => {
+      if (messagesContainer.value) {
+        messagesContainer.value.scrollTop =
+          messagesContainer.value.scrollHeight - prevHeight;
+      }
+      prepending = false;
+      loadingOlder = false;
+    });
+  });
+}
+
 onMounted(scrollToBottom);
-watch(messages, scrollToBottom, { deep: true });
-watch(typingState, (state) => {
-  if (state === "in-progress") scrollToBottom();
+watch(
+  messages,
+  () => {
+    if (!prepending) scrollToBottom();
+  },
+  { deep: true },
+);
+watch(typingState, (typing) => {
+  if (typing) scrollToBottom();
 });
 </script>
 
@@ -95,6 +126,7 @@ watch(typingState, (state) => {
   <div
     ref="messagesContainer"
     class="h-full overflow-y-auto flex flex-col w-full p-3 bg-transparent custom-scrollbar"
+    @scroll.passive="onScroll"
   >
     <template v-for="(group, gi) in groupedMessages" :key="`g-${gi}`">
       <DateSeparator
@@ -106,7 +138,7 @@ watch(typingState, (state) => {
 
       <MessageBubble
         v-for="(item, i) in group.messages"
-        :key="item._id || i"
+        :key="item.id || item.clientMessageId || i"
         :message="item"
         :text-color="textColor"
         :user-message-background="userMessageBackground"
@@ -115,6 +147,7 @@ watch(typingState, (state) => {
         :bot-message-text-color="botMessageTextColor"
         :icon-button-url="iconButtonUrl"
         :instance-name="instanceName"
+        @retry="emit('retry', $event)"
       />
     </template>
   </div>

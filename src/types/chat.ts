@@ -1,10 +1,16 @@
+export type MessageStatus = "sending" | "sent" | "error";
+
 export interface ChatMessage {
-  _id?: string;
+  id?: string;
   content: string;
   role: "user" | "agent";
   createdAt?: string;
   attachments?: Attachment[];
   deleteMarker?: boolean;
+  // Solo locales (mensajes del visitante)
+  clientMessageId?: string;
+  status?: MessageStatus;
+  errorCode?: string;
 }
 
 export interface Attachment {
@@ -24,7 +30,7 @@ export interface ChatTheme {
   botMessageTextColor: string; // Texto de mensajes del bot
 }
 
-export interface CustomStyle extends Partial<ChatTheme> {
+export interface WidgetConfig extends Partial<ChatTheme> {
   welcomeMessage?: string;
   welcomeMessageButton?: string;
   svgName?: string;
@@ -34,6 +40,8 @@ export interface CustomStyle extends Partial<ChatTheme> {
   btn_close_welcome_modal?: boolean;
   time_active_welcome_modal?: number;
 }
+
+export type CustomStyle = WidgetConfig;
 
 export type PositionMode = "fixed" | "absolute" | "relative";
 

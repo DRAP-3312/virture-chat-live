@@ -1,62 +1,86 @@
-import type { ChatMessage } from './chat'
+import type { ChatMessage, WidgetConfig } from './chat'
 
-// Constantes para centralizar nombres de eventos de socket
+// Contrato v2 (namespace /v2/widget)
 export const SocketEvent = {
-  // Eventos del cliente al servidor
-  CONNECTED_CHAT: 'connected-chat',
-  SEND_CHAT_MESSAGE: 'send-chat-message',
-  TYPING_USER_STATE: 'typing-user-state',
-  NAVIGATION_PATH_CHAT: 'navigation-path-chat',
-  GET_CUSTOM_WIDGET: 'get-custom-widget',
-  METRICS_CHAT: 'metrics-chat',
+  // Cliente -> servidor
+  SESSION_START: 'session:start',
+  MESSAGE_SEND: 'message:send',
+  TYPING_SET: 'typing:set',
+  NAVIGATION_TRACK: 'navigation:track',
+  METRICS_REPORT: 'metrics:report',
+  HISTORY_LOAD: 'history:load',
 
-  // Eventos del servidor al cliente
+  // Servidor -> cliente
   CONNECT: 'connect',
   DISCONNECT: 'disconnect',
-  RESPONSE: 'response',
-  LEAD_REGISTERED: 'lead-registered',
-  SCHEDULED_APPOINTMENT: 'scheduled_appointment',
-  TYPING_STATE_WIDGET: 'typing-state-widget',
-  DELETE_MESSAGE: 'delete-message',
+  CONNECT_ERROR: 'connect_error',
+  MESSAGE_NEW: 'message:new',
+  TYPING_STATE: 'typing:state',
+  MESSAGE_DELETED: 'message:deleted',
+  CONFIG_UPDATED: 'config:updated',
+  LEAD_REGISTERED: 'analytics:lead-registered',
+  APPOINTMENT_SCHEDULED: 'analytics:appointment-scheduled',
 } as const
 
 export type SocketEventType = typeof SocketEvent[keyof typeof SocketEvent]
 
-export interface ClientToServerEvents {
-  'connected-chat': (data: { userUUID: string; agentId: string }, callback: (val: { messages?: ChatMessage[] }) => void) => void
-  'send-chat-message': (data: SendMessageData, callback: (val: unknown) => void) => void
-  'typing-user-state': (isTyping: boolean) => void
-  'navigation-path-chat': (data: NavigationData) => void
-  'get-custom-widget': (agentId: string, callback: (config: Record<string, unknown>) => void) => void
-  'metrics-chat': (metrics: SessionMetricsPayload) => void
+export interface SocketAuth {
+  apiKey: string
+  workspaceId: string
+  widgetVersion: string
+  sessionToken?: string
+}
+
+export type SendErrorCode =
+  | 'conversation_locked'
+  | 'rate_limited'
+  | 'invalid_message'
+  | 'internal'
+  | 'offline'
+  | 'timeout'
+
+export interface SessionStartData {
+  visitorId: string
+}
+
+export interface SessionStartAck {
+  sessionToken: string
+  visitorId: string
+  messages: ChatMessage[]
+  hasMore: boolean
+  config: WidgetConfig
 }
 
 export interface SendMessageData {
-  userUUID: string
-  message: string
-  agentId: string
-  api_key: string
+  clientMessageId: string
+  text: string
   utms: Record<string, string> | null
 }
 
-export interface ServerToClientEvents {
-  'response': (message: ChatMessage) => void
-  'lead-registered': () => void
-  'scheduled_appointment': () => void
-  'typing-state-widget': (state: string) => void
-  'delete-message': (messageIds: string[]) => void
+export type SendMessageAck =
+  | { ok: true; message: { id: string; createdAt: string } }
+  | { ok: false; error: { code: string; message: string } }
+
+export interface TypingSetData {
+  typing: boolean
 }
 
 export interface NavigationData {
   urlPath: string
   time: string
-  clientId: string
-  instance: string
   utms: Record<string, string> | null
 }
 
+export interface HistoryLoadData {
+  before: string
+}
+
+export interface HistoryLoadAck {
+  messages: ChatMessage[]
+  hasMore: boolean
+}
+
 export interface SessionMetricsPayload {
-  idClient: string
   browser: string
   browserVersion: string
   os: string
@@ -75,4 +99,22 @@ export interface ClientLocation {
   latitude: number | null
   longitude: number | null
   timezone: string
+}
+
+export interface ClientToServerEvents {
+  'session:start': (data: SessionStartData, ack: (res: SessionStartAck) => void) => void
+  'message:send': (data: SendMessageData, ack: (res: SendMessageAck) => void) => void
+  'typing:set': (data: TypingSetData) => void
+  'navigation:track': (data: NavigationData) => void
+  'metrics:report': (metrics: SessionMetricsPayload) => void
+  'history:load': (data: HistoryLoadData, ack: (res: HistoryLoadAck) => void) => void
+}
+
+export interface ServerToClientEvents {
+  'message:new': (message: ChatMessage) => void
+  'typing:state': (data: { typing: boolean }) => void
+  'message:deleted': (data: { ids: string[] }) => void
+  'config:updated': (config: WidgetConfig) => void
+  'analytics:lead-registered': () => void
+  'analytics:appointment-scheduled': () => void
 }

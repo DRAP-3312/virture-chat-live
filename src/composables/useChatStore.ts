@@ -24,7 +24,11 @@ const customStyle = ref<CustomStyle>({});
 const closeModalOption = ref(savedPermissions.shouldCloseModal);
 const stateBtnAlerts = ref(savedPermissions.alerts);
 const stateBtnUbication = ref(savedPermissions.ubication);
-const typingState = ref("");
+const typingState = ref(false);
+const hasMore = ref(false);
+
+const TYPING_SAFETY_MS = 8000;
+let typingTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function useChatStore() {
   function addMessage(newMessage: ChatMessage) {
@@ -32,8 +36,42 @@ export function useChatStore() {
     messages.value.push(newMessage);
   }
 
+  // Mensaje entrante del servidor; dedupe por id
+  function addIncomingMessage(newMessage: ChatMessage): boolean {
+    if (newMessage.id && messages.value.some((m) => m.id === newMessage.id)) {
+      return false;
+    }
+    addMessage(newMessage);
+    return true;
+  }
+
+  function updateMessageByClientId(
+    clientMessageId: string,
+    patch: Partial<ChatMessage>,
+  ) {
+    messages.value = messages.value.map((m) =>
+      m.clientMessageId === clientMessageId ? { ...m, ...patch } : m,
+    );
+  }
+
+  function prependMessages(older: ChatMessage[]) {
+    const known = new Set(messages.value.map((m) => m.id).filter(Boolean));
+    messages.value = [
+      ...older.filter((m) => !m.id || !known.has(m.id)),
+      ...messages.value,
+    ];
+  }
+
+  function setHasMore(val: boolean) {
+    hasMore.value = val;
+  }
+
+  // Reemplaza el historial conservando los mensajes locales aun sin confirmar
   function setMessages(val: ChatMessage[]) {
-    messages.value = val;
+    const pending = messages.value.filter(
+      (m) => m.status === "sending" || m.status === "error",
+    );
+    messages.value = [...val, ...pending];
   }
 
   function setOpenChat(value: boolean) {
@@ -60,8 +98,17 @@ export function useChatStore() {
     }
   }
 
-  function setTypingStateWidget(state: string) {
-    typingState.value = state;
+  function setTypingState(typing: boolean) {
+    if (typingTimer) clearTimeout(typingTimer);
+    typingTimer = null;
+    typingState.value = typing;
+    // Timeout de seguridad por si se pierde el "false"
+    if (typing) {
+      typingTimer = setTimeout(() => {
+        typingState.value = false;
+        typingTimer = null;
+      }, TYPING_SAFETY_MS);
+    }
   }
 
   function setStateBtnUbication(val: boolean) {
@@ -76,7 +123,7 @@ export function useChatStore() {
   function deleteMessages(messageIds: string[]) {
     if (!Array.isArray(messageIds)) return;
     messages.value = messages.value.map((msg) => {
-      if (msg._id && messageIds.includes(msg._id)) {
+      if (msg.id && messageIds.includes(msg.id)) {
         return { ...msg, deleteMarker: true };
       }
       return msg;
@@ -86,19 +133,24 @@ export function useChatStore() {
   return {
     messages,
     typingState,
+    hasMore,
     openChat,
     customStyle,
     closeModalOption,
     stateBtnAlerts,
     stateBtnUbication,
     addMessage,
+    addIncomingMessage,
+    updateMessageByClientId,
+    prependMessages,
+    setHasMore,
     setMessages,
     setOpenChat,
     setCustomStyle,
     setCloseModalOption,
     setStateBtnAlert,
     setStateBtnUbication,
-    setTypingStateWidget,
+    setTypingState,
     deleteMessages,
   };
 }

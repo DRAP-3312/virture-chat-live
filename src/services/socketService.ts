@@ -1,98 +1,98 @@
 import {
   SocketEvent,
   type SendMessageData,
+  type SendMessageAck,
   type NavigationData,
   type SessionMetricsPayload,
+  type SessionStartAck,
+  type SessionStartData,
+  type HistoryLoadData,
+  type HistoryLoadAck,
 } from "../types/socket-events";
-import type { ChatMessage } from "../types/chat";
 
 interface SocketLike {
   emit: (event: string, ...args: unknown[]) => unknown;
+  timeout?: (ms: number) => {
+    emit: (event: string, ...args: unknown[]) => unknown;
+  };
   connected?: boolean;
 }
 
 type MaybeSocket = SocketLike | null;
 
-/**
- * Servicio centralizado para manejar todos los eventos de socket.io
- * Encapsula la lógica de emisión de eventos para que los componentes
- * no necesiten conocer los detalles de implementación.
- */
-
-// ============================================
-// EVENTOS CLIENTE → SERVIDOR (EMIT)
-// ============================================
+const ACK_TIMEOUT_MS = 10000;
 
 /**
- * Emite evento de conexión establecida y solicita el historial de mensajes
+ * Emite con ack y timeout. Si el ack no llega, responde con `err`.
  */
-export function emitConnectedChat(
-  socket: MaybeSocket,
-  data: { userUUID: string; agentId: string },
-  callback: (response: { messages?: ChatMessage[] }) => void,
+function emitWithAck<T>(
+  socket: SocketLike,
+  event: string,
+  data: unknown,
+  onResult: (err: Error | null, res?: T) => void,
 ) {
-  if (!socket) return;
-  socket.emit(SocketEvent.CONNECTED_CHAT, data, callback);
+  if (socket.timeout) {
+    socket
+      .timeout(ACK_TIMEOUT_MS)
+      .emit(event, data, (err: Error | null, res: T) => onResult(err, res));
+  } else {
+    socket.emit(event, data, (res: T) => onResult(null, res));
+  }
 }
 
-/**
- * Envía un mensaje de chat del usuario al servidor
- */
-export function emitSendChatMessage(
+// ============================================
+// EVENTOS CLIENTE -> SERVIDOR (EMIT)
+// ============================================
+
+export function emitSessionStart(
+  socket: MaybeSocket,
+  data: SessionStartData,
+  onResult: (err: Error | null, res?: SessionStartAck) => void,
+) {
+  if (!socket) return;
+  emitWithAck<SessionStartAck>(socket, SocketEvent.SESSION_START, data, onResult);
+}
+
+export function emitMessageSend(
   socket: MaybeSocket,
   data: SendMessageData,
-  callback: () => void,
+  onResult: (err: Error | null, res?: SendMessageAck) => void,
 ) {
   if (!socket) return;
-  socket.emit(SocketEvent.SEND_CHAT_MESSAGE, data, callback);
+  emitWithAck<SendMessageAck>(socket, SocketEvent.MESSAGE_SEND, data, onResult);
 }
 
-/**
- * Notifica al servidor si el usuario está escribiendo
- */
-export function emitTypingUserState(socket: MaybeSocket, isTyping: boolean) {
+export function emitTypingSet(socket: MaybeSocket, typing: boolean) {
   if (!socket) return;
-  socket.emit(SocketEvent.TYPING_USER_STATE, isTyping);
+  socket.emit(SocketEvent.TYPING_SET, { typing });
 }
 
-/**
- * Rastrea la navegación del usuario (URL actual)
- */
-export function emitNavigationPath(socket: MaybeSocket, data: NavigationData) {
+export function emitNavigationTrack(socket: MaybeSocket, data: NavigationData) {
   if (!socket) return;
-  socket.emit(SocketEvent.NAVIGATION_PATH_CHAT, data);
+  socket.emit(SocketEvent.NAVIGATION_TRACK, data);
 }
 
-/**
- * Solicita la configuración personalizada del widget
- */
-export function emitGetCustomWidget(
-  socket: MaybeSocket,
-  agentId: string,
-  callback: (config: Record<string, unknown>) => void,
-) {
-  if (!socket) return;
-  socket.emit(SocketEvent.GET_CUSTOM_WIDGET, agentId, callback);
-}
-
-/**
- * Envía métricas de sesión del cliente al servidor
- */
-export function emitMetricsChat(
+export function emitMetricsReport(
   socket: MaybeSocket,
   metrics: SessionMetricsPayload,
 ) {
   if (!socket) return;
-  socket.emit(SocketEvent.METRICS_CHAT, metrics);
+  socket.emit(SocketEvent.METRICS_REPORT, metrics);
+}
+
+export function emitHistoryLoad(
+  socket: MaybeSocket,
+  data: HistoryLoadData,
+  onResult: (err: Error | null, res?: HistoryLoadAck) => void,
+) {
+  if (!socket) return;
+  emitWithAck<HistoryLoadAck>(socket, SocketEvent.HISTORY_LOAD, data, onResult);
 }
 
 // ============================================
 // HELPERS
 // ============================================
 
-/**
- * Verifica si un socket está conectado
- */
 export function isSocketConnected(socket: MaybeSocket): boolean {
   return socket?.connected ?? false;
 }

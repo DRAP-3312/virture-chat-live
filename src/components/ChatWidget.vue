@@ -9,13 +9,18 @@ import { useChatStore } from "../composables/useChatStore";
 import { useSessionMetrics } from "../composables/useSessionMetrics";
 import { useSound } from "../composables/useSound";
 import { getStoredUtms } from "../composables/useUtm";
+import { getVisitorId } from "../utils/session";
+import { v4 as uuidv4 } from "uuid";
 import { sendFlexibleEvent, CHAT_EVENTS } from "../utils/analytics";
 import { Filter } from "bad-words";
 import { badWordsSpanishList } from "../utils/bad-words-es";
 import {
-  emitTypingUserState,
-  emitSendChatMessage,
+  emitTypingSet,
+  emitMessageSend,
+  emitHistoryLoad,
+  isSocketConnected,
 } from "../services/socketService";
+import type { SendMessageAck } from "../types/socket-events";
 import type { FormChatProps } from "../types/props";
 
 const props = defineProps<FormChatProps>();
@@ -31,6 +36,9 @@ const typingUser = ref(false);
 const {
   messages,
   addMessage,
+  updateMessageByClientId,
+  prependMessages,
+  setHasMore,
   closeModalOption,
   typingState,
   setCloseModalOption,
@@ -52,7 +60,7 @@ function handleTyping(isTyping: boolean) {
 
 watch(typingUser, (newVal, oldVal) => {
   if (newVal !== oldVal) {
-    emitTypingUserState(props.socket, newVal);
+    emitTypingSet(props.socket, newVal);
   }
 });
 
@@ -62,6 +70,46 @@ watch(isVisible, (val) => {
   }
 });
 
+function applyAck(clientMessageId: string, err: Error | null, res?: SendMessageAck) {
+  if (err || !res) {
+    updateMessageByClientId(clientMessageId, {
+      status: "error",
+      errorCode: "timeout",
+    });
+  } else if (res.ok) {
+    updateMessageByClientId(clientMessageId, {
+      id: res.message.id,
+      createdAt: res.message.createdAt,
+      status: "sent",
+      errorCode: undefined,
+    });
+  } else {
+    updateMessageByClientId(clientMessageId, {
+      status: "error",
+      errorCode: res.error?.code ?? "internal",
+    });
+  }
+}
+
+function dispatchMessage(clientMessageId: string, text: string) {
+  if (!isSocketConnected(props.socket as never)) {
+    updateMessageByClientId(clientMessageId, {
+      status: "error",
+      errorCode: "offline",
+    });
+    return;
+  }
+  updateMessageByClientId(clientMessageId, {
+    status: "sending",
+    errorCode: undefined,
+  });
+  emitMessageSend(
+    props.socket,
+    { clientMessageId, text, utms: getStoredUtms() },
+    (err, res) => applyAck(clientMessageId, err, res),
+  );
+}
+
 function sendMessage() {
   const valueToSend = filter.clean(message.value.trim());
   if (!valueToSend || !props.socket) return;
@@ -70,35 +118,52 @@ function sendMessage() {
     (msg) => msg.role === "user" && !msg.deleteMarker,
   );
 
-  const userUUID = localStorage.getItem("userUUID") ?? "";
-  const utms = getStoredUtms();
+  const visitorId = getVisitorId();
+  const clientMessageId = uuidv4();
 
-  addMessage({ content: valueToSend, role: "user", createdAt: new Date().toISOString() });
-  emitSendChatMessage(
-    props.socket,
-    {
-      userUUID,
-      message: valueToSend,
-      agentId: props.idAgent,
-      api_key: props.apiKey,
-      utms,
-    },
-    () => {},
-  );
+  addMessage({
+    content: valueToSend,
+    role: "user",
+    createdAt: new Date().toISOString(),
+    clientMessageId,
+    status: "sending",
+  });
+  dispatchMessage(clientMessageId, valueToSend);
 
   sendFlexibleEvent(CHAT_EVENTS.MESSAGE_SENT_CLIENT, {
-    chat_session_id: userUUID,
+    chat_session_id: visitorId,
     chat_message_length: valueToSend.length,
     chat_message_type: "text",
   });
 
   if (!hasClientMessages) {
     sendFlexibleEvent(CHAT_EVENTS.SESSION_STARTED, {
-      chat_session_id: userUUID,
+      chat_session_id: visitorId,
     });
   }
 
   message.value = "";
+}
+
+function retryMessage(clientMessageId: string) {
+  const msg = messages.value.find((m) => m.clientMessageId === clientMessageId);
+  if (!msg || msg.status !== "error") return;
+  dispatchMessage(clientMessageId, msg.content);
+}
+
+function loadOlder(done: () => void) {
+  const oldest = messages.value.find((m) => m.id);
+  if (!oldest?.id || !isSocketConnected(props.socket as never)) {
+    done();
+    return;
+  }
+  emitHistoryLoad(props.socket, { before: oldest.id }, (err, res) => {
+    if (!err && res) {
+      prependMessages(res.messages ?? []);
+      setHasMore(!!res.hasMore);
+    }
+    done();
+  });
 }
 
 function handleClose() {
@@ -173,6 +238,8 @@ onMounted(() => {
           :bot-message-text-color="botMessageTextColor"
           :icon-button-url="iconButtonUrl"
           :instance-name="instanceName"
+          @retry="retryMessage"
+          @load-older="loadOlder"
         />
       </div>
 
@@ -183,7 +250,7 @@ onMounted(() => {
       >
         <transition name="fade-slide" mode="out-in">
           <div
-            v-if="typingState === 'in-progress'"
+            v-if="typingState"
             key="typing"
             class="flex items-center w-full"
           >
