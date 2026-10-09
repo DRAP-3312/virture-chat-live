@@ -95,3 +95,14 @@ npm run dev         # servidor de desarrollo
 npm run build:lib   # build para npm
 npm publish         # publicar en npm
 ```
+
+## Modo desarrollo
+
+`npm run dev` monta el widget con valores de prueba. Para no editar codigo,
+pasalos por query string o por `.env.local` (ver `.env.example`):
+
+```
+http://localhost:5173/?apiKey=<key>&idAgent=<workspaceId>&socketUrl=http://localhost:7777
+```
+
+Query string: `apiKey`, `idAgent`, `socketUrl`, `nameSpace`, `instanceName`, `gaTrackingId`.
