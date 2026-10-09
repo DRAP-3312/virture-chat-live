@@ -35,6 +35,7 @@ export type SendErrorCode =
   | 'conversation_locked'
   | 'rate_limited'
   | 'invalid_message'
+  | 'no_session'
   | 'internal'
   | 'offline'
   | 'timeout'
@@ -43,13 +44,20 @@ export interface SessionStartData {
   visitorId: string
 }
 
-export interface SessionStartAck {
+export interface SessionStartOk {
   sessionToken: string
   visitorId: string
   messages: ChatMessage[]
   hasMore: boolean
   config: WidgetConfig
 }
+
+export interface AckError {
+  ok: false
+  error: { code: string; message: string }
+}
+
+export type SessionStartAck = SessionStartOk | AckError
 
 export interface SendMessageData {
   clientMessageId: string
@@ -75,10 +83,9 @@ export interface HistoryLoadData {
   before: string
 }
 
-export interface HistoryLoadAck {
-  messages: ChatMessage[]
-  hasMore: boolean
-}
+export type HistoryLoadAck =
+  | { messages: ChatMessage[]; hasMore: boolean }
+  | AckError
 
 export interface SessionMetricsPayload {
   browser: string

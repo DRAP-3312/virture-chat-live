@@ -115,6 +115,10 @@ export function useSocket(
         console.error("session:start fallo", err);
         return;
       }
+      if ("ok" in res) {
+        console.error("session:start rechazado", res.error);
+        return;
+      }
       if (res.sessionToken) setSessionToken(res.sessionToken);
       setMessages((res.messages ?? []) as ChatMessage[]);
       setHasMore(!!res.hasMore);

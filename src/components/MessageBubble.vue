@@ -9,6 +9,7 @@ const ERROR_TEXT: Record<string, string> = {
   conversation_locked: "La conversación está cerrada",
   rate_limited: "Demasiados mensajes, intenta en un momento",
   invalid_message: "Mensaje no válido",
+  no_session: "Sesión no iniciada, recarga la página",
   offline: "Sin conexión",
   timeout: "No se pudo confirmar el envío",
 };
@@ -19,6 +20,7 @@ const canRetry = computed(
   () =>
     !!props.message.clientMessageId &&
     props.message.errorCode !== "invalid_message" &&
+    props.message.errorCode !== "no_session" &&
     props.message.errorCode !== "conversation_locked",
 );
 

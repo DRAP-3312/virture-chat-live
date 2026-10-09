@@ -158,7 +158,7 @@ function loadOlder(done: () => void) {
     return;
   }
   emitHistoryLoad(props.socket, { before: oldest.id }, (err, res) => {
-    if (!err && res) {
+    if (!err && res && !("ok" in res)) {
       prependMessages(res.messages ?? []);
       setHasMore(!!res.hasMore);
     }
